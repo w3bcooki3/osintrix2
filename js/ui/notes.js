@@ -187,7 +187,7 @@ function exportNotes(editor, title) {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       line-height: 1.6;
       color: #333;
-      max-width: 800px;
+      max-width: 1200px;
       margin: 40px auto;
       padding: 20px;
     }

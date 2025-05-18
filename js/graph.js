@@ -390,6 +390,13 @@ function resetGraphView() {
   }).run();
 }
 
+function resetGraph() {
+  if (cy) {
+    cy.elements().remove();
+    cy.fit();
+  }
+}
+
 export {
   initGraph,
   addNodeToGraph,
@@ -400,5 +407,6 @@ export {
   highlightNode,
   clearHighlights,
   findShortestPath,
-  resetGraphView
+  resetGraphView,
+  resetGraph
 };
