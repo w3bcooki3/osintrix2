@@ -1,6 +1,5 @@
-// Import all necessary modules
-import { initGraph, addNodeToGraph, removeNodeFromGraph, addEdgeToGraph, removeEdgeFromGraph, findNode, highlightNode, clearHighlights, findShortestPath, resetGraphView } from './graph.js';
-import { createEntity, getEntityIcon, getEntityById, getAllEntities, deleteEntity, addEntityConnection, removeEntityConnection, updateEntity, duplicateEntity } from './entities.js';
+import { initGraph, addNodeToGraph, removeNodeFromGraph, addEdgeToGraph, removeEdgeFromGraph, findNode, highlightNode, clearHighlights, findShortestPath, resetGraphView, resetGraph } from './graph.js';
+import { createEntity, getEntityIcon, getEntityById, getAllEntities, deleteEntity, addEntityConnection, removeEntityConnection, updateEntity, setEntitiesData } from './entities.js';
 import { setupStorage, saveInvestigation, loadInvestigation, exportInvestigation, importInvestigation } from './utils/storage.js';
 import { initializePanels, togglePanel, closeAllPanels } from './ui/panels.js';
 import { initializeNotes } from './ui/notes.js';
@@ -18,7 +17,6 @@ let state = {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-
   // Apply dark theme immediately
   document.body.classList.add('dark-theme');
   
@@ -125,6 +123,36 @@ function setupEventListeners() {
 
   // Reset layout button
   document.getElementById('reset-layout-btn').addEventListener('click', resetGraphView);
+
+  // Reset graph button
+  document.getElementById('reset-graph-btn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset the graph? This will delete all entities and connections.')) {
+      // Clear graph
+      resetGraph();
+      
+      // Clear entities data
+      setEntitiesData([]);
+      
+      // Clear localStorage
+      localStorage.removeItem('osintrix_investigation');
+      localStorage.removeItem('osintrix_notes');
+      localStorage.removeItem('osintrix_notes_title');
+      localStorage.removeItem('osintrix_advanced_notes');
+      localStorage.removeItem('osintrix_timeline_entries');
+      
+      // Reset UI
+      updateEntityList();
+      document.getElementById('investigation-title').value = '';
+      document.getElementById('notes-editor').innerHTML = '';
+      
+      // Hide panels
+      togglePanel('entity-panel', false, true);
+      togglePanel('entity-list-panel', false, false);
+      
+      // Clear state
+      state.selectedEntityId = null;
+    }
+  });
 
   // Entity form submission
   document.getElementById('add-entity-form').addEventListener('submit', (e) => {

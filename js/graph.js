@@ -196,7 +196,7 @@ function setupGraphEvents() {
   cy.on('click', function(event) {
     if (event.target === cy) {
       import('./app.js').then(app => {
-        app.selectEntity(null); // Pass null to indicate background click
+        app.selectEntity(null);
       });
     }
   });
@@ -209,13 +209,39 @@ function setupGraphEvents() {
     });
   });
 
-  // Context menu handler
+  // Right-click handler for nodes
   cy.on('cxttap', 'node', function(event) {
+    event.preventDefault();
     const node = event.target;
-    const posPx = event.renderedPosition;
-    import('./ui/contextMenu.js').then(contextMenu => {
-      contextMenu.showContextMenu(posPx.x, posPx.y, node.id());
+    
+    // Get the node's rendered position (in screen coordinates)
+    const renderedPos = node.renderedPosition();
+    const containerPos = cy.container().getBoundingClientRect();
+    
+    // Calculate screen coordinates
+    const x = containerPos.left + renderedPos.x;
+    const y = containerPos.top + renderedPos.y;
+    
+    // First select the node
+    import('./app.js').then(app => {
+      app.selectEntity(node.id());
+      
+      // Then show context menu
+      import('./ui/contextMenu.js').then(contextMenu => {
+        contextMenu.showContextMenu(x, y, node.id(), 'graph');
+      });
     });
+    
+    return false;
+  });
+
+  // Hide context menu on background click
+  cy.on('click', function(event) {
+    if (event.target === cy) {
+      import('./ui/contextMenu.js').then(contextMenu => {
+        contextMenu.hideContextMenu();
+      });
+    }
   });
 }
 
