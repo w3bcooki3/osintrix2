@@ -60,11 +60,6 @@ Built entirely with frontend technologies and uses **Cytoscape.js** for graph re
 - Can be minimized to bottom-right
 - **Exportable to clean HTML** for investigation reports
 
-### 🕒 Timeline View (Bottom Panel)
-
-- Track chronological evolution of events or transactions
-- Toggle visibility
-
 ### 🔎 Search & Filters
 
 - Global search by label, type, or metadata
