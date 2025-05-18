@@ -1,8 +1,7 @@
 # 🕵️‍♂️ OSINT Graph Visualizer — Personal Cyber Investigation Tool
 
-> A powerful client-side graph-based visualization tool for **OSINT, threat intelligence, and cryptocurrency fraud investigations**, built using **HTML, CSS, vanilla JavaScript**, and **Cytoscape.js** (no frameworks like React or Angular).
+> A client-side graph-based visualization tool for **OSINT, threat intelligence, and cryptocurrency fraud investigations**, built using **HTML, CSS, vanilla JavaScript**, and **Cytoscape.js** (no frameworks like React or Angular).
 
-![screenshot-placeholder](preview.png) <!-- Replace with your screenshot -->
 
 ---
 
@@ -16,6 +15,8 @@ This is a **personal-use investigation tool** built for mapping complex relation
 - Cybercrime investigations
 
 Built entirely with frontend technologies and uses **Cytoscape.js** for graph rendering and **Font Awesome** for iconography. No heavy frontend frameworks or build steps — fully browser-based.
+
+> 🚀 This is a personal project built with the help of **bolt.new AI** — still in active development. Expect bugs, fixes, and fresh features soon!
 
 ---
 
@@ -90,4 +91,37 @@ Built entirely with frontend technologies and uses **Cytoscape.js** for graph re
 | **Font Awesome** | Entity icons and UI visuals |
 
 > No React, no frameworks, no build step.
+
+---
+
+## ⚡ Why I Built This
+
+Most OSINT or investigation tools available today are either:
+- **Too expensive**, with premium features locked behind paywalls
+- **Too limited**, missing the flexibility or personal control I needed
+- Or they just didn’t *feel right* for the way I investigate
+
+So I built this tool myself — from scratch — with full control, no dependencies, and no costs involved.
+
+> This project was designed and developed by **bolt.new AI** — a personal initiative to create smarter, leaner tools without paying a cent.
+
+---
+
+## 🚧 Project Status & Roadmap
+
+This project is still in active development.
+
+- 🐞 **Known Bugs**: Some minor bugs and quirks may be present during node editing, panel resizing, and metadata rendering.
+- 🧪 **Experimental Features**: Timeline view and rich text notes are functional but still evolving.
+- 🔧 **Planned Improvements**:
+  - Better layout controls
+  - Subgraph grouping/collapsing
+  - Real-time collaboration (in future versions)
+  - Encrypted project files (optional)
+  - Performance optimization for large graphs
+
+> ⚠️ Bug fixes and new features will be added regularly as I refine the tool based on real-world use.
+
+---
+
 
