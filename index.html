@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSINTrix - Cyber Investigation Tool</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/welcome.css" />
+  </head>
+  <body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen">
+      <div class="welcome-content">
+        <div class="welcome-logo">
+          <i class="fas fa-network-wired"></i>
+        </div>
+        <h1>Welcome to OSINTrix</h1>
+        <p>Map networks. Trace threats. Solve the unknown.</p>
+        <div class="welcome-loader">
+          <div class="loader-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="logo">
+          <i class="fas fa-network-wired"></i>
+          <div class="logo-text">
+            <h1>OSINTrix</h1>
+            <div class="tagline">Your investigation begins here</div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search entities...">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="toolbar-actions">
+            <button id="add-entity-btn" class="btn-primary">
+              <i class="fas fa-plus"></i> Add Entity
+            </button>
+            <button id="add-connection-toolbar-btn" class="btn-primary">
+              <i class="fas fa-link"></i> Add Connection
+            </button>
+            <button id="reset-layout-btn" class="btn-icon" title="Reset Layout">
+              <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+            <button id="toggle-entity-list-btn" class="btn-icon">
+              <i class="fas fa-list"></i>
+            </button>
+            <button id="toggle-notes-btn" class="btn-icon">
+              <i class="fas fa-sticky-note"></i>
+            </button>
+            <button id="export-btn" class="btn-icon">
+              <i class="fas fa-download"></i>
+            </button>
+            <button id="import-btn" class="btn-icon">
+              <i class="fas fa-upload"></i>
+            </button>
+            <button id="theme-toggle-btn" class="btn-icon">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="app-content">
+        <!-- Graph Container -->
+        <div id="graph-container"></div>
+
+        <!-- Entity List Panel -->
+        <div id="entity-list-panel" class="panel">
+          <div class="panel-header">
+            <h3>Entities</h3>
+            <div class="panel-actions">
+              <button id="toggle-filter-btn" class="btn-icon">
+                <i class="fas fa-filter"></i>
+              </button>
+              <button id="collapse-entity-list-btn" class="btn-icon">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-content">
+            <div id="filter-options" class="filter-options hidden">
+              <div class="filter-group">
+                <label>Entity Types</label>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" class="entity-type-filter" value="person" checked> Person</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="organization" checked> Organization</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="wallet" checked> Wallet</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="ip" checked> IP Address</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="location" checked> Location</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="domain" checked> Domain</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="transaction" checked> Transaction</label>
+                  <label><input type="checkbox" class="entity-type-filter" value="social" checked> Social Media</label>
+                </div>
+              </div>
+            </div>
+            <ul id="entity-list" class="entity-list">
+              <!-- Entities will be populated here -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Entity Detail Panel -->
+        <div id="entity-panel" class="panel hidden">
+          <div class="panel-header">
+            <h3>Entity Details</h3>
+            <div class="panel-actions">
+              <button id="edit-entity-btn" class="btn-icon">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button id="delete-entity-btn" class="btn-icon">
+                <i class="fas fa-trash"></i>
+              </button>
+              <button id="collapse-entity-panel-btn" class="btn-icon">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-content">
+            <div id="entity-details" class="entity-details">
+              <!-- Entity details will be populated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Update the notes panel section in index.html -->
+        <div id="notes-panel" class="panel hidden">
+          <div class="panel-header">
+            <div class="notes-title">
+              <input type="text" id="investigation-title" placeholder="Investigation Title" class="title-input">
+            </div>
+            <div class="panel-actions">
+              <button id="collapse-notes-btn" class="btn-icon">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-content">
+            <div class="notes-toolbar">
+              <div class="notes-tool-group">
+                <button type="button" data-command="bold" class="notes-tool" title="Bold">
+                  <i class="fas fa-bold"></i>
+                </button>
+                <button type="button" data-command="italic" class="notes-tool" title="Italic">
+                  <i class="fas fa-italic"></i>
+                </button>
+                <button type="button" data-command="underline" class="notes-tool" title="Underline">
+                  <i class="fas fa-underline"></i>
+                </button>
+                <button type="button" data-command="strikeThrough" class="notes-tool" title="Strike Through">
+                  <i class="fas fa-strikethrough"></i>
+                </button>
+              </div>
+              <div class="notes-tool-group">
+                <button type="button" data-command="justifyLeft" class="notes-tool" title="Align Left">
+                  <i class="fas fa-align-left"></i>
+                </button>
+                <button type="button" data-command="justifyCenter" class="notes-tool" title="Align Center">
+                  <i class="fas fa-align-center"></i>
+                </button>
+                <button type="button" data-command="justifyRight" class="notes-tool" title="Align Right">
+                  <i class="fas fa-align-right"></i>
+                </button>
+              </div>
+              <div class="notes-tool-group">
+                <button type="button" data-command="insertUnorderedList" class="notes-tool" title="Bullet List">
+                  <i class="fas fa-list-ul"></i>
+                </button>
+                <button type="button" data-command="insertOrderedList" class="notes-tool" title="Numbered List">
+                  <i class="fas fa-list-ol"></i>
+                </button>
+              </div>
+              <div class="notes-tool-group">
+                <button type="button" data-command="createLink" class="notes-tool" title="Insert Link">
+                  <i class="fas fa-link"></i>
+                </button>
+                <button type="button" data-command="insertImage" class="notes-tool" title="Insert Image">
+                  <i class="fas fa-image"></i>
+                </button>
+              </div>
+              <div class="notes-tool-group">
+                <button type="button" data-command="h1" class="notes-tool" title="Heading 1">H1</button>
+                <button type="button" data-command="h2" class="notes-tool" title="Heading 2">H2</button>
+                <button type="button" data-command="h3" class="notes-tool" title="Heading 3">H3</button>
+              </div>
+            </div>
+            <div id="notes-editor" class="notes-editor" contenteditable="true"></div>
+            <div class="form-actions">
+              <button id="clear-notes-btn" class="btn-secondary">
+                <i class="fas fa-eraser"></i> Clear
+              </button>
+              <button id="export-notes-btn" class="btn-primary">
+                <i class="fas fa-file-export"></i> Export
+              </button>
+            </div>
+          </div>
+          <!-- Add resize handle -->
+          <div class="resize-handle">
+            <div class="resize-handle-n"></div>
+            <div class="resize-handle-e"></div>
+            <div class="resize-handle-s"></div>
+            <div class="resize-handle-w"></div>
+          </div>
+        </div>
+
+        
+
+        <!-- Context Menu -->
+        <div id="context-menu" class="context-menu hidden">
+          <ul>
+            <li id="context-edit"><i class="fas fa-edit"></i> Edit</li>
+            <li id="context-connect"><i class="fas fa-link"></i> Connect</li>
+            <li id="context-highlight"><i class="fas fa-highlighter"></i> Highlight</li>
+            <li id="context-delete"><i class="fas fa-trash"></i> Delete</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modals -->
+      <div id="add-entity-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Add Entity</h3>
+            <button id="close-add-entity-modal" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="add-entity-form">
+              <div class="form-group">
+                <label for="entity-type">Entity Type</label>
+                <select id="entity-type" required>
+                  <option value="">Select Type</option>
+                  <option value="person">Person</option>
+                  <option value="organization">Organization</option>
+                  <option value="wallet">Wallet Address</option>
+                  <option value="ip">IP Address</option>
+                  <option value="location">Location</option>
+                  <option value="transaction">Transaction ID</option>
+                  <option value="social">Social Media</option>
+                  <option value="domain">Domain/Website</option>
+                  <option value="money">Money Amount</option>
+                  <option value="group">Group</option>
+                  <option value="username">Username</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="entity-name">Name/Identifier</label>
+                <input type="text" id="entity-name" placeholder="Enter name or identifier" required>
+              </div>
+              <div class="form-group">
+                <label for="entity-label">Display Label</label>
+                <input type="text" id="entity-label" placeholder="Enter display label">
+              </div>
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="entity-date">Date</label>
+                  <input type="date" id="entity-date">
+                </div>
+                <div class="form-group half">
+                  <label for="entity-time">Time</label>
+                  <input type="time" id="entity-time">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="entity-location">Location</label>
+                <input type="text" id="entity-location" placeholder="Enter location">
+              </div>
+              <div class="form-group">
+                <label for="entity-tags">Tags (comma separated)</label>
+                <input type="text" id="entity-tags" placeholder="Enter tags">
+              </div>
+              <div class="form-group">
+                <label for="entity-description">Description</label>
+                <textarea id="entity-description" placeholder="Enter description"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Custom Metadata</label>
+                <div id="metadata-fields">
+                  <!-- Metadata fields will be added here -->
+                </div>
+                <button type="button" id="add-metadata-field" class="btn-secondary">
+                  <i class="fas fa-plus"></i> Add Metadata Field
+                </button>
+              </div>
+              <div class="form-group">
+                <label>Image</label>
+                <div class="image-upload-container">
+                  <div id="image-preview"></div>
+                  <input type="file" id="node-image" accept="image/*">
+                  <button type="button" id="upload-image-btn" class="btn-secondary">
+                    <i class="fas fa-upload"></i> Upload Image
+                  </button>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" id="cancel-add-entity" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Add Entity</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="add-connection-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Add Connection</h3>
+            <button id="close-add-connection-modal" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="add-connection-form">
+              <div class="form-group">
+                <label for="source-entity">From</label>
+                <select id="source-entity" required>
+                  <option value="">Select Source Entity</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="target-entity">To</label>
+                <select id="target-entity" required>
+                  <option value="">Select Target Entity</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="connection-label">Relationship Label</label>
+                <input type="text" id="connection-label" placeholder="e.g., owns, transferred to, located at">
+              </div>
+              <div class="form-actions">
+                <button type="button" id="cancel-add-connection" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Add Connection</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add the edit connection modal -->
+      <div id="edit-connection-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Edit Connection</h3>
+            <button id="close-edit-connection-modal" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="edit-connection-form">
+              <input type="hidden" id="edit-connection-source">
+              <input type="hidden" id="edit-connection-target">
+              <div class="form-group">
+                <label for="edit-connection-label">Relationship Label</label>
+                <input type="text" id="edit-connection-label" placeholder="e.g., owns, transferred to, located at">
+              </div>
+              <div class="form-actions">
+                <button type="button" id="delete-connection" class="btn-secondary">
+                  <i class="fas fa-trash"></i> Delete Connection
+                </button>
+                <button type="submit" class="btn-primary">Update Connection</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Export Investigation</h3>
+            <button id="close-export-modal" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="export-filename">Filename</label>
+              <input type="text" id="export-filename" value="osintrix-investigation" required>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="cancel-export" class="btn-secondary">Cancel</button>
+              <button type="button" id="confirm-export" class="btn-primary">Export</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="import-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Import Investigation</h3>
+            <button id="close-import-modal" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="import-file">Select File</label>
+              <input type="file" id="import-file" accept=".json">
+            </div>
+            <div class="form-actions">
+              <button type="button" id="cancel-import" class="btn-secondary">Cancel</button>
+              <button type="button" id="confirm-import" class="btn-primary">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>
