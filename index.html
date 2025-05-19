@@ -68,6 +68,11 @@
             <button id="theme-toggle-btn" class="btn-icon">
               <i class="fas fa-moon"></i>
             </button>
+
+            <!-- Add this button to the toolbar section in the header -->
+            <button id="toggle-links-btn" class="btn-icon">
+              <i class="fas fa-link"></i>
+            </button>
           </div>
         </div>
       </header>
@@ -224,6 +229,135 @@
             <li id="context-delete"><i class="fas fa-trash"></i> Delete</li>
           </ul>
         </div>
+
+        <!-- Add this just before the closing </div> of app-content -->
+        <!-- Links Panel -->
+        <div id="links-panel" class="panel hidden">
+          <div class="links-header">
+            <div class="links-title">
+              <i class="fas fa-link"></i>
+              Investigation Links
+            </div>
+            <div class="panel-actions">
+              <button id="collapse-links-btn" class="btn-icon">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+          <div class="links-content">
+            <div class="links-section">
+              <div class="links-section-title">Search Engines</div>
+              <div class="links-list">
+                <a href="https://www.aol.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">AOL</div>
+                    <div class="link-description">The web for America</div>
+                  </div>
+                </a>
+                <a href="https://www.ask.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Ask</div>
+                    <div class="link-description">Ask something and get an answer</div>
+                  </div>
+                </a>
+                <a href="https://www.bing.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Bing</div>
+                    <div class="link-description">Microsoft's search engine</div>
+                  </div>
+                </a>
+                <a href="https://search.brave.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Brave</div>
+                    <div class="link-description">Private, independent, and transparent search</div>
+                  </div>
+                </a>
+                <a href="https://duckduckgo.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">DuckDuckGo</div>
+                    <div class="link-description">Privacy-focused search engine</div>
+                  </div>
+                </a>
+                <a href="https://www.goodsearch.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Goodsearch</div>
+                    <div class="link-description">Search engine for shopping deals</div>
+                  </div>
+                </a>
+                <a href="https://www.google.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Google Search</div>
+                    <div class="link-description">Most popular search engine</div>
+                  </div>
+                </a>
+                <a href="https://www.instya.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Instya</div>
+                    <div class="link-description">Multi-site search engine</div>
+                  </div>
+                </a>
+                <a href="https://www.impersonal.me" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Impersonal.me</div>
+                    <div class="link-description">Anonymous search engine</div>
+                  </div>
+                </a>
+                <a href="https://www.lycos.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Lycos</div>
+                    <div class="link-description">Search for media and products</div>
+                  </div>
+                </a>
+                <a href="https://www.mojeek.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Mojeek</div>
+                    <div class="link-description">Independent, non-tracking search engine</div>
+                  </div>
+                </a>
+                <a href="https://www.search.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Search.com</div>
+                    <div class="link-description">Multi-engine search platform</div>
+                  </div>
+                </a>
+                <a href="https://www.wolframalpha.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Wolfram Alpha</div>
+                    <div class="link-description">Computational knowledge engine</div>
+                  </div>
+                </a>
+                <a href="https://search.yahoo.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">Yahoo! Search</div>
+                    <div class="link-description">Find exactly what you're looking for</div>
+                  </div>
+                </a>
+                <a href="https://you.com" target="_blank" class="link-item">
+                  <i class="fas fa-search"></i>
+                  <div class="link-info">
+                    <div class="link-name">YOU</div>
+                    <div class="link-description">AI search engine</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Modals -->

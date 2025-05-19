@@ -232,6 +232,37 @@ function setupEventListeners() {
   });
 
   document.getElementById('node-image').addEventListener('change', handleImageUpload);
+
+    // Links panel toggle
+  document.getElementById('toggle-links-btn').addEventListener('click', () => {
+    const linksPanel = document.getElementById('links-panel');
+    linksPanel.classList.toggle('hidden');
+    if (!linksPanel.classList.contains('hidden')) {
+      linksPanel.classList.remove('collapsed');
+    }
+  });
+
+  // Links panel collapse
+  document.getElementById('collapse-links-btn').addEventListener('click', () => {
+    const linksPanel = document.getElementById('links-panel');
+    linksPanel.classList.toggle('collapsed');
+    const icon = document.querySelector('#collapse-links-btn i');
+    icon.className = linksPanel.classList.contains('collapsed') ? 
+      'fas fa-chevron-up' : 
+      'fas fa-chevron-down';
+  });
+
+  // Links panel header click to collapse
+  document.querySelector('.links-header').addEventListener('click', (e) => {
+    if (!e.target.closest('.btn-icon')) {
+      const linksPanel = document.getElementById('links-panel');
+      linksPanel.classList.toggle('collapsed');
+      const icon = document.querySelector('#collapse-links-btn i');
+      icon.className = linksPanel.classList.contains('collapsed') ? 
+        'fas fa-chevron-up' : 
+        'fas fa-chevron-down';
+    }
+  });
 }
 
 function handleSearch() {

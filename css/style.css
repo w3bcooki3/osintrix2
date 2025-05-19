@@ -1793,3 +1793,109 @@ textarea {
   justify-content: flex-end;
   gap: 8px;
 }
+
+
+/* Add to the end of your existing CSS file */
+
+/* Links Panel */
+#links-panel {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-panel);
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+#links-panel.hidden {
+  display: none;
+}
+
+#links-panel.collapsed {
+  max-height: 46px;
+  overflow: hidden;
+}
+
+.links-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.links-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.links-content {
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.links-section {
+  margin-bottom: var(--space-4);
+}
+
+.links-section-title {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.links-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-3);
+}
+
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.link-item:hover {
+  background-color: var(--bg-tertiary);
+  text-decoration: none;
+}
+
+.link-item i {
+  color: var(--primary);
+  width: 24px;
+  text-align: center;
+}
+
+.link-info {
+  flex: 1;
+}
+
+.link-name {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.link-description {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
