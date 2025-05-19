@@ -12,7 +12,8 @@ let state = {
   selectedEntityId: null,
   isInitialLoad: true,
   editMode: false,
-  metadataFields: []
+  metadataFields: [],
+  searchHighlightedNodes: new Set()
 };
 
 // Initialize the application
@@ -151,6 +152,10 @@ function setupEventListeners() {
       
       // Clear state
       state.selectedEntityId = null;
+      state.searchHighlightedNodes.clear();
+      
+      // Clear search
+      document.getElementById('search-input').value = '';
     }
   });
 
@@ -227,6 +232,160 @@ function setupEventListeners() {
   });
 
   document.getElementById('node-image').addEventListener('change', handleImageUpload);
+}
+
+function handleSearch() {
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+  const entityItems = document.querySelectorAll('.entity-item');
+  
+  // Clear previous highlights
+  clearHighlights();
+  state.searchHighlightedNodes.clear();
+  
+  if (!searchTerm) {
+    entityItems.forEach(item => {
+      item.style.display = '';
+    });
+    return;
+  }
+  
+  entityItems.forEach(item => {
+    const entityName = item.querySelector('.entity-label').textContent.toLowerCase();
+    const entityType = item.getAttribute('data-type').toLowerCase();
+    const entityId = item.getAttribute('data-id');
+    
+    if (entityName.includes(searchTerm) || entityType.includes(searchTerm)) {
+      item.style.display = '';
+      
+      // Highlight matching node and its connections in the graph
+      if (entityId) {
+        const node = findNode(entityId);
+        if (node) {
+          node.addClass('highlighted');
+          state.searchHighlightedNodes.add(entityId);
+          
+          // Highlight connected edges and nodes
+          const connectedEdges = node.connectedEdges();
+          connectedEdges.addClass('highlighted');
+          
+          const connectedNodes = node.neighborhood('node');
+          connectedNodes.forEach(connectedNode => {
+            connectedNode.addClass('highlighted');
+            state.searchHighlightedNodes.add(connectedNode.id());
+          });
+        }
+      }
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function toggleTheme() {
+  const body = document.body;
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  
+  state.isDarkTheme = !state.isDarkTheme;
+  
+  if (state.isDarkTheme) {
+    body.classList.add('dark-theme');
+    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+  } else {
+    body.classList.remove('dark-theme');
+    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+  }
+}
+
+function toggleFilters() {
+  const filterOptions = document.getElementById('filter-options');
+  filterOptions.classList.toggle('hidden');
+}
+
+function filterEntities() {
+  const selectedTypes = Array.from(document.querySelectorAll('.entity-type-filter:checked'))
+    .map(checkbox => checkbox.value);
+  
+  const entityItems = document.querySelectorAll('.entity-item');
+  
+  entityItems.forEach(item => {
+    const entityType = item.getAttribute('data-type');
+    if (selectedTypes.includes(entityType)) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function showModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.classList.remove('hidden');
+}
+
+function hideModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.classList.add('hidden');
+}
+
+function addNewEntity() {
+  const type = document.getElementById('entity-type').value;
+  const name = document.getElementById('entity-name').value;
+  const label = document.getElementById('entity-label').value || name;
+  const date = document.getElementById('entity-date').value;
+  const time = document.getElementById('entity-time').value;
+  const location = document.getElementById('entity-location').value;
+  const tags = document.getElementById('entity-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+  const description = document.getElementById('entity-description').value;
+  
+  // Get metadata
+  const metadata = {};
+  document.querySelectorAll('.metadata-field').forEach(field => {
+    const key = field.querySelector('.metadata-key').value.trim();
+    const value = field.querySelector('.metadata-value').value.trim();
+    if (key && value) {
+      metadata[key] = value;
+    }
+  });
+  
+  // Get image if exists
+  const imagePreview = document.getElementById('image-preview');
+  const imageData = imagePreview.classList.contains('has-image') ? 
+    imagePreview.style.backgroundImage.slice(5, -2) : 
+    '';
+  
+  const entity = createEntity({
+    type,
+    name,
+    label,
+    date,
+    time,
+    location,
+    tags,
+    description,
+    metadata,
+    image: imageData
+  });
+  
+  // Add to graph
+  addNodeToGraph({
+    id: entity.id,
+    label: entity.label,
+    type: entity.type
+  });
+  
+  // Update UI
+  updateEntityList();
+  
+  // Reset form and hide modal
+  document.getElementById('add-entity-form').reset();
+  document.getElementById('image-preview').classList.remove('has-image');
+  document.getElementById('image-preview').style.backgroundImage = '';
+  document.getElementById('metadata-fields').innerHTML = '';
+  
+  hideModal('add-entity-modal');
+  
+  // Save state
+  saveInvestigation();
 }
 
 function editEntity(entityId) {
@@ -338,129 +497,6 @@ function updateExistingEntity() {
   hideModal('add-entity-modal');
   state.editMode = false;
 
-  // Save state
-  saveInvestigation();
-}
-
-function toggleTheme() {
-  const body = document.body;
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  
-  state.isDarkTheme = !state.isDarkTheme;
-  
-  if (state.isDarkTheme) {
-    body.classList.add('dark-theme');
-    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-  } else {
-    body.classList.remove('dark-theme');
-    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-  }
-}
-
-function toggleFilters() {
-  const filterOptions = document.getElementById('filter-options');
-  filterOptions.classList.toggle('hidden');
-}
-
-function filterEntities() {
-  const selectedTypes = Array.from(document.querySelectorAll('.entity-type-filter:checked'))
-    .map(checkbox => checkbox.value);
-  
-  const entityItems = document.querySelectorAll('.entity-item');
-  
-  entityItems.forEach(item => {
-    const entityType = item.getAttribute('data-type');
-    if (selectedTypes.includes(entityType)) {
-      item.style.display = '';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-}
-
-function handleSearch() {
-  const searchTerm = document.getElementById('search-input').value.toLowerCase();
-  const entityItems = document.querySelectorAll('.entity-item');
-  
-  entityItems.forEach(item => {
-    const entityName = item.querySelector('.entity-label').textContent.toLowerCase();
-    const entityType = item.getAttribute('data-type').toLowerCase();
-    
-    if (entityName.includes(searchTerm) || entityType.includes(searchTerm)) {
-      item.style.display = '';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-}
-
-function showModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.classList.remove('hidden');
-}
-
-function hideModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.classList.add('hidden');
-}
-
-function addNewEntity() {
-  const type = document.getElementById('entity-type').value;
-  const name = document.getElementById('entity-name').value;
-  const label = document.getElementById('entity-label').value || name;
-  const date = document.getElementById('entity-date').value;
-  const time = document.getElementById('entity-time').value;
-  const location = document.getElementById('entity-location').value;
-  const tags = document.getElementById('entity-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
-  const description = document.getElementById('entity-description').value;
-  
-  // Get metadata
-  const metadata = {};
-  document.querySelectorAll('.metadata-field').forEach(field => {
-    const key = field.querySelector('.metadata-key').value.trim();
-    const value = field.querySelector('.metadata-value').value.trim();
-    if (key && value) {
-      metadata[key] = value;
-    }
-  });
-  
-  // Get image if exists
-  const imagePreview = document.getElementById('image-preview');
-  const imageData = imagePreview.classList.contains('has-image') ? 
-    imagePreview.style.backgroundImage.slice(5, -2) : 
-    '';
-  
-  const entity = createEntity({
-    type,
-    name,
-    label,
-    date,
-    time,
-    location,
-    tags,
-    description,
-    metadata,
-    image: imageData
-  });
-  
-  // Add to graph
-  addNodeToGraph({
-    id: entity.id,
-    label: entity.label,
-    type: entity.type
-  });
-  
-  // Update UI
-  updateEntityList();
-  
-  // Reset form and hide modal
-  document.getElementById('add-entity-form').reset();
-  document.getElementById('image-preview').classList.remove('has-image');
-  document.getElementById('image-preview').style.backgroundImage = '';
-  document.getElementById('metadata-fields').innerHTML = '';
-  
-  hideModal('add-entity-modal');
-  
   // Save state
   saveInvestigation();
 }
