@@ -230,7 +230,6 @@
           </ul>
         </div>
 
-        <!-- Add this just before the closing </div> of app-content -->
         <!-- Links Panel -->
         <div id="links-panel" class="panel hidden">
           <div class="links-header">
@@ -239,13 +238,21 @@
               Investigation Links
             </div>
             <div class="panel-actions">
+              <div class="links-search">
+                <input type="text" id="links-search" placeholder="Search links...">
+                <select id="links-category">
+                  <option value="all">All Categories</option>
+                  <option value="search">Search Engines</option>
+                  <option value="dns">DNS Tools</option>
+                </select>
+              </div>
               <button id="collapse-links-btn" class="btn-icon">
                 <i class="fas fa-chevron-down"></i>
               </button>
             </div>
           </div>
           <div class="links-content">
-            <div class="links-section">
+            <div class="links-section" data-category="search">
               <div class="links-section-title">Search Engines</div>
               <div class="links-list">
                 <a href="https://www.aol.com" target="_blank" class="link-item">
@@ -351,6 +358,47 @@
                   <div class="link-info">
                     <div class="link-name">YOU</div>
                     <div class="link-description">AI search engine</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            
+            <div class="links-section" data-category="dns">
+              <div class="links-section-title">DNS Tools</div>
+              <div class="links-list">
+                <a href="https://dnsdumpster.com" target="_blank" class="link-item">
+                  <i class="fas fa-network-wired"></i>
+                  <div class="link-info">
+                    <div class="link-name">DNSdumpster</div>
+                    <div class="link-description">DNS recon and research tool</div>
+                  </div>
+                </a>
+                <a href="https://www.whatsmydns.net" target="_blank" class="link-item">
+                  <i class="fas fa-network-wired"></i>
+                  <div class="link-info">
+                    <div class="link-name">WhatsMyDNS</div>
+                    <div class="link-description">Global DNS propagation checker</div>
+                  </div>
+                </a>
+                <a href="https://toolbox.googleapps.com/apps/dig" target="_blank" class="link-item">
+                  <i class="fas fa-network-wired"></i>
+                  <div class="link-info">
+                    <div class="link-name">Google DNS Tools</div>
+                    <div class="link-description">DNS lookup and diagnostic tools</div>
+                  </div>
+                </a>
+                <a href="https://mxtoolbox.com" target="_blank" class="link-item">
+                  <i class="fas fa-network-wired"></i>
+                  <div class="link-info">
+                    <div class="link-name">MXToolbox</div>
+                    <div class="link-description">DNS, MX, and network diagnostics</div>
+                  </div>
+                </a>
+                <a href="https://www.robtex.com" target="_blank" class="link-item">
+                  <i class="fas fa-network-wired"></i>
+                  <div class="link-info">
+                    <div class="link-name">Robtex</div>
+                    <div class="link-description">DNS and network research tool</div>
                   </div>
                 </a>
               </div>

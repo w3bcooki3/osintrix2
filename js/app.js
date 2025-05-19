@@ -233,7 +233,16 @@ function setupEventListeners() {
 
   document.getElementById('node-image').addEventListener('change', handleImageUpload);
 
-    // Links panel toggle
+    // Links search and filter
+  document.getElementById('links-search').addEventListener('input', filterLinks);
+  document.getElementById('links-category').addEventListener('change', filterLinks);
+
+  // Prevent collapse when interacting with search and category
+  document.querySelector('.links-search').addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Links panel toggle
   document.getElementById('toggle-links-btn').addEventListener('click', () => {
     const linksPanel = document.getElementById('links-panel');
     linksPanel.classList.toggle('hidden');
@@ -243,7 +252,8 @@ function setupEventListeners() {
   });
 
   // Links panel collapse
-  document.getElementById('collapse-links-btn').addEventListener('click', () => {
+  document.getElementById('collapse-links-btn').addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent event from reaching the header
     const linksPanel = document.getElementById('links-panel');
     linksPanel.classList.toggle('collapsed');
     const icon = document.querySelector('#collapse-links-btn i');
@@ -254,13 +264,47 @@ function setupEventListeners() {
 
   // Links panel header click to collapse
   document.querySelector('.links-header').addEventListener('click', (e) => {
-    if (!e.target.closest('.btn-icon')) {
+    // Only collapse if clicking directly on the header, not its interactive children
+    if (!e.target.closest('.links-search') && !e.target.closest('.btn-icon')) {
       const linksPanel = document.getElementById('links-panel');
       linksPanel.classList.toggle('collapsed');
       const icon = document.querySelector('#collapse-links-btn i');
       icon.className = linksPanel.classList.contains('collapsed') ? 
         'fas fa-chevron-up' : 
         'fas fa-chevron-down';
+    }
+  });
+ 
+}
+
+function filterLinks() {
+  const searchTerm = document.getElementById('links-search').value.toLowerCase();
+  const category = document.getElementById('links-category').value;
+  const sections = document.querySelectorAll('.links-section');
+
+  sections.forEach(section => {
+    const sectionCategory = section.getAttribute('data-category');
+    const links = section.querySelectorAll('.link-item');
+    let hasVisibleLinks = false;
+
+    // Show/hide based on category
+    if (category === 'all' || category === sectionCategory) {
+      links.forEach(link => {
+        const name = link.querySelector('.link-name').textContent.toLowerCase();
+        const description = link.querySelector('.link-description').textContent.toLowerCase();
+        const matches = name.includes(searchTerm) || description.includes(searchTerm);
+        
+        link.classList.toggle('highlight', matches && searchTerm.length > 0);
+        link.style.display = matches || !searchTerm ? '' : 'none';
+        
+        if (matches || !searchTerm) {
+          hasVisibleLinks = true;
+        }
+      });
+      
+      section.classList.toggle('hidden', !hasVisibleLinks);
+    } else {
+      section.classList.add('hidden');
     }
   });
 }

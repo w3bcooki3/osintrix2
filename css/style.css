@@ -1795,8 +1795,6 @@ textarea {
 }
 
 
-/* Add to the end of your existing CSS file */
-
 /* Links Panel */
 #links-panel {
   position: fixed;
@@ -1898,4 +1896,40 @@ textarea {
   font-size: 0.8rem;
   color: var(--text-tertiary);
   line-height: 1.2;
+}
+
+/* Links Panel Search */
+.links-search {
+  display: flex;
+  gap: var(--space-2);
+  margin-right: var(--space-2);
+}
+
+#links-search {
+  width: 200px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+#links-category {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+/* Hide sections when filtered */
+.links-section.hidden {
+  display: none;
+}
+
+/* Link item highlight when searched */
+.link-item.highlight {
+  background-color: rgba(45, 91, 255, 0.1);
 }
