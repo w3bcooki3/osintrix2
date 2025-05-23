@@ -1,3 +1,4 @@
+// App functionality
 import { initGraph, addNodeToGraph, removeNodeFromGraph, addEdgeToGraph, removeEdgeFromGraph, findNode, highlightNode, clearHighlights, findShortestPath, resetGraphView, resetGraph } from './graph.js';
 import { createEntity, getEntityIcon, getEntityById, getAllEntities, deleteEntity, addEntityConnection, removeEntityConnection, updateEntity, setEntitiesData } from './entities.js';
 import { setupStorage, saveInvestigation, loadInvestigation, exportInvestigation, importInvestigation } from './utils/storage.js';
@@ -125,6 +126,18 @@ function setupEventListeners() {
   // Reset layout button
   document.getElementById('reset-layout-btn').addEventListener('click', resetGraphView);
 
+  // Add cancel button handler
+  document.getElementById('cancel-add-entity').addEventListener('click', () => {
+    resetAddEntityForm();
+    hideModal('add-entity-modal');
+  });
+  
+  // Update close button handler
+  document.getElementById('close-add-entity-modal').addEventListener('click', () => {
+    resetAddEntityForm();
+    hideModal('add-entity-modal');
+  });
+
   // Reset graph button
   document.getElementById('reset-graph-btn').addEventListener('click', () => {
     if (confirm('Are you sure you want to reset the graph? This will delete all entities and connections.')) {
@@ -233,7 +246,7 @@ function setupEventListeners() {
 
   document.getElementById('node-image').addEventListener('change', handleImageUpload);
 
-    // Links search and filter
+  // Links search and filter
   document.getElementById('links-search').addEventListener('input', filterLinks);
   document.getElementById('links-category').addEventListener('change', filterLinks);
 
@@ -274,7 +287,9 @@ function setupEventListeners() {
         'fas fa-chevron-down';
     }
   });
- 
+
+  // Add entity type change handler
+  document.getElementById('entity-type').addEventListener('change', updateEntityFormFields);
 }
 
 function filterLinks() {
@@ -404,14 +419,40 @@ function hideModal(modalId) {
 
 function addNewEntity() {
   const type = document.getElementById('entity-type').value;
-  const name = document.getElementById('entity-name').value;
-  const label = document.getElementById('entity-label').value || name;
-  const date = document.getElementById('entity-date').value;
-  const time = document.getElementById('entity-time').value;
-  const location = document.getElementById('entity-location').value;
-  const tags = document.getElementById('entity-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
-  const description = document.getElementById('entity-description').value;
-  
+  if (!type) return;
+
+  // Get all form fields
+  const dynamicFields = document.getElementById('dynamic-fields');
+  const formData = {};
+
+  // Add entity type
+  formData.type = type;
+  formData.label = ''; // Will be set based on primary field
+
+  // Process dynamic fields
+  if (dynamicFields) {
+    // Handle regular inputs and textareas
+    dynamicFields.querySelectorAll('input:not([type="file"]), textarea').forEach(field => {
+      if (field.type === 'checkbox') {
+        formData[field.id] = field.checked;
+      } else if (!field.name.includes('[]')) {
+        formData[field.id] = field.value.trim();
+      }
+    });
+
+    // Handle repeatable fields
+    dynamicFields.querySelectorAll('.repeatable-group').forEach(group => {
+      const fieldName = group.dataset.name;
+      formData[fieldName] = [];
+      group.querySelectorAll('input').forEach(input => {
+        const value = input.value.trim();
+        if (value) {
+          formData[fieldName].push(value);
+        }
+      });
+    });
+  }
+
   // Get metadata
   const metadata = {};
   document.querySelectorAll('.metadata-field').forEach(field => {
@@ -421,46 +462,124 @@ function addNewEntity() {
       metadata[key] = value;
     }
   });
-  
+  formData.metadata = metadata;
+
   // Get image if exists
   const imagePreview = document.getElementById('image-preview');
-  const imageData = imagePreview.classList.contains('has-image') ? 
+  formData.image = imagePreview.classList.contains('has-image') ? 
     imagePreview.style.backgroundImage.slice(5, -2) : 
     '';
-  
-  const entity = createEntity({
-    type,
-    name,
-    label,
-    date,
-    time,
-    location,
-    tags,
-    description,
-    metadata,
-    image: imageData
-  });
-  
+
+  // Handle tags field
+  const tagsField = dynamicFields.querySelector('#tags');
+  if (tagsField && tagsField.value) {
+    formData.tags = tagsField.value.split(',').map(tag => tag.trim()).filter(Boolean);
+  } else {
+    formData.tags = [];
+  }
+
+  // Set the label based on primary field for each entity type
+  switch (type) {
+    case 'person':
+      formData.label = formData.name || 'Unnamed Person';
+      break;
+    case 'organization':
+      formData.label = formData.name || 'Unnamed Organization';
+      break;
+    case 'wallet':
+      formData.label = formData.address || 'Unknown Wallet';
+      break;
+    case 'ip':
+      formData.label = formData.ip || 'Unknown IP';
+      break;
+    case 'location':
+      formData.label = [formData.city, formData.country].filter(Boolean).join(', ') || 'Unknown Location';
+      break;
+    case 'transaction':
+      formData.label = formData.txId || 'Unknown Transaction';
+      break;
+    case 'social':
+      formData.label = `${formData.username} (${formData.platform})` || 'Unknown Profile';
+      break;
+    case 'domain':
+      formData.label = formData.domain || 'Unknown Domain';
+      break;
+    case 'group':
+      formData.label = formData.name || 'Unknown Group';
+      break;
+    case 'username':
+      formData.label = formData.usernames?.[0] || 'Unknown Username';
+      break;
+    case 'money':
+      formData.label = `${formData.value} ${formData.currency}` || 'Unknown Amount';
+      break;
+    case 'email':
+      formData.label = formData.emails?.[0] || 'Unknown Email';
+      break;
+    case 'phone':
+      formData.label = formData.numbers?.[0] || 'Unknown Phone';
+      break;
+    case 'alias':
+      formData.label = formData.aliases?.[0] || 'Unknown Alias';
+      break;
+    case 'document':
+      formData.label = formData.filename || 'Unknown Document';
+      break;
+    case 'malware':
+      formData.label = formData.name || 'Unknown Malware';
+      break;
+    default:
+      formData.label = 'Unknown Entity';
+  }
+
+  // Create entity
+  const entity = createEntity(formData);
+
   // Add to graph
   addNodeToGraph({
     id: entity.id,
     label: entity.label,
     type: entity.type
   });
-  
+
   // Update UI
   updateEntityList();
-  
+
   // Reset form and hide modal
-  document.getElementById('add-entity-form').reset();
-  document.getElementById('image-preview').classList.remove('has-image');
-  document.getElementById('image-preview').style.backgroundImage = '';
-  document.getElementById('metadata-fields').innerHTML = '';
-  
+  resetAddEntityForm();
   hideModal('add-entity-modal');
-  
+
   // Save state
   saveInvestigation();
+}
+
+function resetAddEntityForm() {
+  const form = document.getElementById('add-entity-form');
+  form.reset();
+  
+  // Clear entity type
+  document.getElementById('entity-type').value = '';
+  
+  // Clear dynamic fields
+  const dynamicFields = document.getElementById('dynamic-fields');
+  if (dynamicFields) {
+    dynamicFields.remove();
+  }
+  
+  // Clear metadata fields
+  document.getElementById('metadata-fields').innerHTML = '';
+  
+  // Clear image preview
+  const imagePreview = document.getElementById('image-preview');
+  imagePreview.classList.remove('has-image');
+  imagePreview.style.backgroundImage = '';
+  
+  // Reset submit button text
+  const submitButton = form.querySelector('button[type="submit"]');
+  submitButton.textContent = 'Add Entity';
+  
+  // Reset edit mode
+  state.editMode = false;
 }
 
 function editEntity(entityId) {
@@ -476,15 +595,50 @@ function editEntity(entityId) {
   const metadataContainer = document.getElementById('metadata-fields');
   metadataContainer.innerHTML = '';
   
-  // Populate form with entity data
-  document.getElementById('entity-type').value = entity.type || '';
-  document.getElementById('entity-name').value = entity.name;
-  document.getElementById('entity-label').value = entity.label;
-  document.getElementById('entity-date').value = entity.date;
-  document.getElementById('entity-time').value = entity.time;
-  document.getElementById('entity-location').value = entity.location;
-  document.getElementById('entity-tags').value = entity.tags.join(', ');
-  document.getElementById('entity-description').value = entity.description;
+  // Set entity type and trigger field generation
+  document.getElementById('entity-type').value = entity.type;
+  updateEntityFormFields();
+  
+  // Populate dynamic fields
+  const dynamicFields = document.getElementById('dynamic-fields');
+  if (dynamicFields) {
+    // Handle regular inputs and textareas
+    dynamicFields.querySelectorAll('input:not([type="file"]), textarea').forEach(field => {
+      if (field.type === 'checkbox') {
+        field.checked = entity[field.id];
+      } else if (!field.name.includes('[]')) {
+        field.value = entity[field.id] || '';
+      }
+    });
+    
+    // Handle repeatable fields
+    dynamicFields.querySelectorAll('.repeatable-group').forEach(group => {
+      const fieldName = group.dataset.name;
+      const values = entity[fieldName] || [];
+      
+      // Remove initial empty input
+      group.querySelectorAll('.input-group').forEach(ig => ig.remove());
+      
+      // Add an input for each value
+      values.forEach(value => {
+        const inputGroup = createRepeatableInput(fieldName);
+        inputGroup.querySelector('input').value = value;
+        group.insertBefore(inputGroup, group.querySelector('.add-field'));
+      });
+      
+      // Add one empty input if no values
+      if (values.length === 0) {
+        const inputGroup = createRepeatableInput(fieldName);
+        group.insertBefore(inputGroup, group.querySelector('.add-field'));
+      }
+    });
+
+    // Set tags
+    const tagsField = dynamicFields.querySelector('#tags');
+    if (tagsField && entity.tags) {
+      tagsField.value = entity.tags.join(', ');
+    }
+  }
   
   // Add metadata fields
   if (entity.metadata) {
@@ -493,6 +647,7 @@ function editEntity(entityId) {
     });
   }
   
+  // Set image if exists
   if (entity.image) {
     const imagePreview = document.getElementById('image-preview');
     imagePreview.style.backgroundImage = `url(${entity.image})`;
@@ -512,13 +667,46 @@ function updateExistingEntity() {
   if (!entityId) return;
 
   const type = document.getElementById('entity-type').value;
-  const name = document.getElementById('entity-name').value;
-  const label = document.getElementById('entity-label').value || name;
-  const date = document.getElementById('entity-date').value;
-  const time = document.getElementById('entity-time').value;
-  const location = document.getElementById('entity-location').value;
-  const tags = document.getElementById('entity-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
-  const description = document.getElementById('entity-description').value;
+  if (!type) return;
+
+  // Get all form fields
+  const dynamicFields = document.getElementById('dynamic-fields');
+  const formData = {};
+
+  // Add entity type
+  formData.type = type;
+
+  // Process dynamic fields
+  if (dynamicFields) {
+    // Handle regular inputs and textareas
+    dynamicFields.querySelectorAll('input:not([type="file"]), textarea').forEach(field => {
+      if (field.type === 'checkbox') {
+        formData[field.id] = field.checked;
+      } else if (!field.name.includes('[]')) {
+        formData[field.id] = field.value.trim();
+      }
+    });
+
+    // Handle repeatable fields
+    dynamicFields.querySelectorAll('.repeatable-group').forEach(group => {
+      const fieldName = group.dataset.name;
+      formData[fieldName] = [];
+      group.querySelectorAll('input').forEach(input => {
+        const value = input.value.trim();
+        if (value) {
+          formData[fieldName].push(value);
+        }
+      });
+    });
+
+    // Handle tags field
+    const tagsField = dynamicFields.querySelector('#tags');
+    if (tagsField && tagsField.value) {
+      formData.tags = tagsField.value.split(',').map(tag => tag.trim()).filter(Boolean);
+    } else {
+      formData.tags = [];
+    }
+  }
 
   // Get metadata
   const metadata = {};
@@ -529,29 +717,75 @@ function updateExistingEntity() {
       metadata[key] = value;
     }
   });
+  formData.metadata = metadata;
 
+  // Get image if exists
   const imagePreview = document.getElementById('image-preview');
-  const imageData = imagePreview.classList.contains('has-image') ? 
+  formData.image = imagePreview.classList.contains('has-image') ? 
     imagePreview.style.backgroundImage.slice(5, -2) : 
     '';
 
-  const updatedEntity = updateEntity(entityId, {
-    type,
-    name,
-    label,
-    date,
-    time,
-    location,
-    tags,
-    description,
-    metadata,
-    image: imageData
-  });
+  // Set the label based on primary field for each entity type
+  switch (type) {
+    case 'person':
+      formData.label = formData.name || 'Unnamed Person';
+      break;
+    case 'organization':
+      formData.label = formData.name || 'Unnamed Organization';
+      break;
+    case 'wallet':
+      formData.label = formData.address || 'Unknown Wallet';
+      break;
+    case 'ip':
+      formData.label = formData.ip || 'Unknown IP';
+      break;
+    case 'location':
+      formData.label = [formData.city, formData.country].filter(Boolean).join(', ') || 'Unknown Location';
+      break;
+    case 'transaction':
+      formData.label = formData.txId || 'Unknown Transaction';
+      break;
+    case 'social':
+      formData.label = `${formData.username} (${formData.platform})` || 'Unknown Profile';
+      break;
+    case 'domain':
+      formData.label = formData.domain || 'Unknown Domain';
+      break;
+    case 'group':
+      formData.label = formData.name || 'Unknown Group';
+      break;
+    case 'username':
+      formData.label = formData.usernames?.[0] || 'Unknown Username';
+      break;
+    case 'money':
+      formData.label = `${formData.value} ${formData.currency}` || 'Unknown Amount';
+      break;
+    case 'email':
+      formData.label = formData.emails?.[0] || 'Unknown Email';
+      break;
+    case 'phone':
+      formData.label = formData.numbers?.[0] || 'Unknown Phone';
+      break;
+    case 'alias':
+      formData.label = formData.aliases?.[0] || 'Unknown Alias';
+      break;
+    case 'document':
+      formData.label = formData.filename || 'Unknown Document';
+      break;
+    case 'malware':
+      formData.label = formData.name || 'Unknown Malware';
+      break;
+    default:
+      formData.label = 'Unknown Entity';
+  }
+
+  // Update entity
+  const updatedEntity = updateEntity(entityId, formData);
 
   // Update graph node
   const node = findNode(entityId);
   if (node) {
-    node.data('label', label);
+    node.data('label', formData.label);
     node.data('type', type);
   }
 
@@ -560,20 +794,296 @@ function updateExistingEntity() {
   showEntityDetails(entityId);
 
   // Reset form and hide modal
-  document.getElementById('add-entity-form').reset();
-  document.getElementById('image-preview').classList.remove('has-image');
-  document.getElementById('image-preview').style.backgroundImage = '';
-  document.getElementById('metadata-fields').innerHTML = '';
-
-  // Reset submit button text
-  const submitButton = document.querySelector('#add-entity-form button[type="submit"]');
-  submitButton.textContent = 'Add Entity';
-
+  resetAddEntityForm();
   hideModal('add-entity-modal');
-  state.editMode = false;
 
   // Save state
   saveInvestigation();
+}
+
+// Add event listener for entity type change
+document.getElementById('entity-type').addEventListener('change', updateEntityFormFields);
+
+function updateEntityFormFields() {
+  const entityType = document.getElementById('entity-type').value;
+  const formGroup = document.getElementById('entity-type').closest('.form-group');
+  const dynamicFields = document.getElementById('dynamic-fields');
+  
+  // Remove existing dynamic fields if any
+  if (dynamicFields) {
+    dynamicFields.remove();
+  }
+  
+  // Create new dynamic fields container
+  const newDynamicFields = document.createElement('div');
+  newDynamicFields.id = 'dynamic-fields';
+  
+  // Define common fields that appear in all entity types
+  const commonFields = [
+    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'notes', label: 'Notes', type: 'textarea' },
+    { name: 'tags', label: 'Tags (comma separated)', type: 'text' }
+  ];
+  
+  // Define fields based on entity type
+  let fields = [];
+  
+  switch (entityType) {
+    case 'person':
+      fields = [
+        { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text' },
+        { name: 'dob', label: 'Date of Birth', type: 'date' },
+        { name: 'nationality', label: 'Nationality', type: 'text' },
+        { name: 'city', label: 'City', type: 'text' },
+        { name: 'country', label: 'Country', type: 'text' },
+        { name: 'phones', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel' },
+        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email' },
+        { name: 'wallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text' },
+        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+      ];
+      break;
+      
+    case 'organization':
+      fields = [
+        { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'website', label: 'Website', type: 'url' },
+        { name: 'country', label: 'Country', type: 'text' },
+        { name: 'hqAddress', label: 'HQ Address', type: 'text' },
+        { name: 'city', label: 'City', type: 'text' },
+        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+      ];
+      break;
+      
+    case 'wallet':
+      fields = [
+        { name: 'blockchain', label: 'Blockchain', type: 'text', required: true },
+        { name: 'address', label: 'Address', type: 'text', required: true },
+        
+        { name: 'owner', label: 'Known Owner', type: 'text' },
+        { name: 'exchange', label: 'Exchange Used', type: 'text' },
+        { name: 'transactions', label: 'Linked Transactions', type: 'repeatable', inputType: 'text' }
+      ];
+      break;
+      
+    case 'ip':
+      fields = [
+        { name: 'ip', label: 'IP', type: 'text', required: true },
+        { name: 'asn', label: 'ASN', type: 'text' },
+        { name: 'country', label: 'Country', type: 'text' },
+        { name: 'city', label: 'City', type: 'text' },
+        { name: 'isp', label: 'ISP/Hostname', type: 'text' },
+        { name: 'isVpn', label: 'VPN/Proxy', type: 'checkbox' }
+      ];
+      break;
+      
+    case 'location':
+      fields = [
+        { name: 'city', label: 'City', type: 'text', required: true },
+        { name: 'state', label: 'State', type: 'text' },
+        { name: 'country', label: 'Country', type: 'text', required: true },
+        { name: 'latitude', label: 'Latitude', type: 'text' },
+        { name: 'longitude', label: 'Longitude', type: 'text' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+      ];
+      break;
+      
+    case 'transaction':
+      fields = [
+        { name: 'txId', label: 'Transaction ID/Hash', type: 'text', required: true },
+        { name: 'platform', label: 'Platform', type: 'text' },
+        { name: 'fromWallet', label: 'From Wallet', type: 'text' },
+        { name: 'toWallet', label: 'To Wallet', type: 'text' },
+        { name: 'amount', label: 'Amount', type: 'text' },
+        { name: 'currency', label: 'Currency', type: 'text' },
+        { name: 'timestamp', label: 'Timestamp', type: 'datetime-local' },
+        { name: 'country', label: 'Exchange/Platform Country', type: 'text' }
+      ];
+      break;
+      
+    case 'social':
+      fields = [
+        { name: 'username', label: 'Username/Handle', type: 'text', required: true },
+        { name: 'platform', label: 'Platform', type: 'text', required: true },
+        { name: 'profileUrl', label: 'Profile URL', type: 'url' },
+        { name: 'avatar', label: 'Avatar URL', type: 'url' }
+      ];
+      break;
+      
+    case 'domain':
+      fields = [
+        { name: 'domain', label: 'Domain Name', type: 'text', required: true },
+        { name: 'ip', label: 'IP Address', type: 'text' },
+        { name: 'hostingCountry', label: 'Hosting Country', type: 'text' },
+        { name: 'hostingCity', label: 'Hosting City', type: 'text' },
+        { name: 'registrar', label: 'Registrar', type: 'text' },
+        { name: 'coordinates', label: 'Coordinates', type: 'text' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' },
+        { name: 'whois', label: 'WHOIS Info', type: 'textarea' },
+        { name: 'ssl', label: 'SSL Info', type: 'textarea' }
+      ];
+      break;
+      
+    case 'group':
+      fields = [
+        { name: 'name', label: 'Group Name', type: 'text', required: true },
+        { name: 'groupType', label: 'Type', type: 'text' },
+        { name: 'members', label: 'Known Members', type: 'repeatable', inputType: 'text' },
+        { name: 'region', label: 'Operating Region', type: 'text' },
+        { name: 'city', label: 'City', type: 'text' },
+        { name: 'country', label: 'Country', type: 'text' },
+        { name: 'coordinates', label: 'Coordinates', type: 'text' }
+      ];
+      break;
+      
+    case 'username':
+      fields = [
+        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text', required: true },
+        { name: 'platforms', label: 'Associated Platforms', type: 'repeatable', inputType: 'text' },
+        { name: 'linkedEmails', label: 'Linked Emails', type: 'repeatable', inputType: 'email' },
+        { name: 'linkedWallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text' }
+      ];
+      break;
+      
+    case 'money':
+      fields = [
+        { name: 'value', label: 'Value', type: 'number', required: true },
+        { name: 'currency', label: 'Currency', type: 'text', required: true },
+        { name: 'associatedWallets', label: 'Associated Wallets', type: 'repeatable', inputType: 'text' }
+      ];
+      break;
+      
+    case 'email':
+      fields = [
+        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email', required: true },
+        { name: 'owner', label: 'Owner', type: 'text' },
+        { name: 'breaches', label: 'Breaches', type: 'textarea' }
+      ];
+      break;
+      
+    case 'phone':
+      fields = [
+        { name: 'numbers', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel', required: true },
+        { name: 'countryCode', label: 'Country Code', type: 'text' },
+        { name: 'carrier', label: 'Carrier', type: 'text' },
+        { name: 'isVoip', label: 'VOIP', type: 'checkbox' }
+      ];
+      break;
+      
+    case 'alias':
+      fields = [
+        { name: 'aliases', label: 'Alias Names', type: 'repeatable', inputType: 'text', required: true },
+        { name: 'realIdentity', label: 'Linked to Real Identity', type: 'text' },
+        { name: 'context', label: 'Context', type: 'textarea' }
+      ];
+      break;
+      
+    case 'document':
+      fields = [
+        { name: 'filename', label: 'Filename', type: 'text', required: true },
+        { name: 'hashes', label: 'SHA256/MD5', type: 'repeatable', inputType: 'text' },
+        { name: 'fileType', label: 'File Type', type: 'text' },
+        { name: 'uploadedBy', label: 'Uploaded By', type: 'text' }
+      ];
+      break;
+      
+    case 'malware':
+      fields = [
+        { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'malwareType', label: 'Malware Type', type: 'text' },
+        { name: 'hashes', label: 'Known Hashes', type: 'repeatable', inputType: 'text' },
+        { name: 'servers', label: 'Known Servers', type: 'repeatable', inputType: 'text' }
+      ];
+      break;
+  }
+  
+  // Combine type-specific fields with common fields
+  fields = [...fields, ...commonFields];
+  
+  // Generate HTML for fields
+  fields.forEach(field => {
+    const fieldContainer = document.createElement('div');
+    fieldContainer.className = 'form-group';
+    
+    const label = document.createElement('label');
+    label.setAttribute('for', field.name);
+    label.textContent = field.label + (field.required ? ' *' : '');
+    
+    if (field.type === 'repeatable') {
+      // Create repeatable field group
+      const repeatableGroup = document.createElement('div');
+      repeatableGroup.className = 'repeatable-group';
+      repeatableGroup.dataset.name = field.name;
+      
+      // Add initial input
+      const inputGroup = createRepeatableInput(field.name, field.inputType);
+      repeatableGroup.appendChild(inputGroup);
+      
+      // Add button
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-secondary add-field';
+      addBtn.innerHTML = '<i class="fas fa-plus"></i> Add Another';
+      addBtn.onclick = () => {
+        const newInput = createRepeatableInput(field.name, field.inputType);
+        repeatableGroup.insertBefore(newInput, addBtn);
+      };
+      
+      repeatableGroup.appendChild(addBtn);
+      
+      fieldContainer.appendChild(label);
+      fieldContainer.appendChild(repeatableGroup);
+    } else {
+      let input;
+      if (field.type === 'textarea') {
+        input = document.createElement('textarea');
+      } else {
+        input = document.createElement('input');
+        input.type = field.type;
+      }
+      
+      input.id = field.name;
+      input.name = field.name;
+      input.className = field.type === 'checkbox' ? '' : 'form-control';
+      if (field.required) input.required = true;
+      
+      if (field.type === 'checkbox') {
+        label.appendChild(input);
+        fieldContainer.appendChild(label);
+      } else {
+        fieldContainer.appendChild(label);
+        fieldContainer.appendChild(input);
+      }
+    }
+    
+    newDynamicFields.appendChild(fieldContainer);
+  });
+  
+  // Insert dynamic fields after entity type
+  formGroup.parentNode.insertBefore(newDynamicFields, formGroup.nextSibling);
+}
+
+function createRepeatableInput(name, type) {
+  const inputGroup = document.createElement('div');
+  inputGroup.className = 'input-group';
+  
+  const input = document.createElement('input');
+  input.type = type || 'text';
+  input.name = `${name}[]`;
+  input.className = 'form-control';
+  
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'btn-icon remove-field';
+  removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+  removeBtn.onclick = () => inputGroup.remove();
+  
+  inputGroup.appendChild(input);
+  inputGroup.appendChild(removeBtn);
+  
+  return inputGroup;
 }
 
 function updateEntityList() {
@@ -657,7 +1167,7 @@ function showEntityDetails(entityId) {
       </div>
     </div>
   `;
-  
+
   // Description section
   if (entity.description) {
     detailsHTML += `
@@ -667,75 +1177,206 @@ function showEntityDetails(entityId) {
       </div>
     `;
   }
-  
-  // Metadata section
+
+  // Notes section
+  if (entity.notes) {
+    detailsHTML += `
+      <div class="entity-section">
+        <div class="entity-section-title">Notes</div>
+        <p>${entity.notes}</p>
+      </div>
+    `;
+  }
+
+  // Type-specific fields section
   detailsHTML += `
     <div class="entity-section">
-      <div class="entity-section-title">Metadata</div>
+      <div class="entity-section-title">Details</div>
       <div class="entity-metadata">
   `;
-  
-  if (entity.name) {
-    detailsHTML += `
-      <div class="entity-metadata-key">Name/ID:</div>
-      <div class="entity-metadata-value">${entity.name}</div>
-    `;
+
+  // Add type-specific fields based on entity type
+  switch (entity.type) {
+    case 'person':
+      if (entity.name) detailsHTML += createMetadataField('Name', entity.name);
+      if (entity.dob) detailsHTML += createMetadataField('Date of Birth', entity.dob);
+      if (entity.nationality) detailsHTML += createMetadataField('Nationality', entity.nationality);
+      if (entity.city) detailsHTML += createMetadataField('City', entity.city);
+      if (entity.country) detailsHTML += createMetadataField('Country', entity.country);
+      if (entity.coordinates) detailsHTML += createMetadataField('Coordinates', entity.coordinates);
+      if (entity.googleMaps) detailsHTML += createMetadataField('Google Maps', `<a href="${entity.googleMaps}" target="_blank">View Location</a>`);
+      if (entity.usernames && entity.usernames.length > 0) detailsHTML += createMetadataField('Usernames', entity.usernames.join(', '));
+      if (entity.phones && entity.phones.length > 0) detailsHTML += createMetadataField('Phone Numbers', entity.phones.join(', '));
+      if (entity.emails && entity.emails.length > 0) detailsHTML += createMetadataField('Email Addresses', entity.emails.join(', '));
+      if (entity.wallets && entity.wallets.length > 0) detailsHTML += createMetadataField('Linked Wallets', entity.wallets.join(', '));
+      break;
+
+    case 'organization':
+      if (entity.name) detailsHTML += createMetadataField('Name', entity.name);
+      if (entity.website) detailsHTML += createMetadataField('Website', `<a href="${entity.website}" target="_blank">${entity.website}</a>`);
+      if (entity.country) detailsHTML += createMetadataField('Country', entity.country);
+      if (entity.hqAddress) detailsHTML += createMetadataField('HQ Address', entity.hqAddress);
+      if (entity.city) detailsHTML += createMetadataField('City', entity.city);
+      if (entity.coordinates) detailsHTML += createMetadataField('Coordinates', entity.coordinates);
+      if (entity.googleMaps) detailsHTML += createMetadataField('Google Maps', `<a href="${entity.googleMaps}" target="_blank">View Location</a>`);
+      break;
+
+    case 'wallet':
+      if (entity.blockchain) detailsHTML += createMetadataField('Blockchain', entity.blockchain);
+      if (entity.address) detailsHTML += createMetadataField('Address', entity.address);
+      if (entity.owner) detailsHTML += createMetadataField('Known Owner', entity.owner);
+      if (entity.exchange) detailsHTML += createMetadataField('Exchange Used', entity.exchange);
+      if (entity.transactions && entity.transactions.length > 0) detailsHTML += createMetadataField('Linked Transactions', entity.transactions.join(', '));
+      break;
+
+    case 'ip':
+      if (entity.ip) detailsHTML += createMetadataField('IP', entity.ip);
+      if (entity.asn) detailsHTML += createMetadataField('ASN', entity.asn);
+      if (entity.country) detailsHTML += createMetadataField('Country', entity.country);
+      if (entity.city) detailsHTML += createMetadataField('City', entity.city);
+      if (entity.isp) detailsHTML += createMetadataField('ISP/Hostname', entity.isp);
+      if (entity.isVpn !== undefined) detailsHTML += createMetadataField('VPN/Proxy', entity.isVpn ? 'Yes' : 'No');
+      break;
+
+    case 'location':
+      if (entity.city) detailsHTML += createMetadataField('City', entity.city);
+      if (entity.state) detailsHTML += createMetadataField('State', entity.state);
+      if (entity.country) detailsHTML += createMetadataField('Country', entity.country);
+      if (entity.latitude) detailsHTML += createMetadataField('Latitude', entity.latitude);
+      if (entity.longitude) detailsHTML += createMetadataField('Longitude', entity.longitude);
+      if (entity.googleMaps) detailsHTML += createMetadataField('Google Maps', `<a href="${entity.googleMaps}" target="_blank">View Location</a>`);
+      break;
+
+    case 'transaction':
+      if (entity.txId) detailsHTML += createMetadataField('Transaction ID/Hash', entity.txId);
+      if (entity.platform) detailsHTML += createMetadataField('Platform', entity.platform);
+      if (entity.fromWallet) detailsHTML += createMetadataField('From Wallet', entity.fromWallet);
+      if (entity.toWallet) detailsHTML += createMetadataField('To Wallet', entity.toWallet);
+      if (entity.amount) detailsHTML += createMetadataField('Amount', entity.amount);
+      if (entity.currency) detailsHTML += createMetadataField('Currency', entity.currency);
+      if (entity.timestamp) detailsHTML += createMetadataField('Timestamp', entity.timestamp);
+      if (entity.country) detailsHTML += createMetadataField('Exchange/Platform Country', entity.country);
+      break;
+
+    case 'social':
+      if (entity.username) detailsHTML += createMetadataField('Username/Handle', entity.username);
+      if (entity.platform) detailsHTML += createMetadataField('Platform', entity.platform);
+      if (entity.profileUrl) detailsHTML += createMetadataField('Profile URL', `<a href="${entity.profileUrl}" target="_blank">${entity.profileUrl}</a>`);
+      if (entity.avatar) detailsHTML += createMetadataField('Avatar URL', `<a href="${entity.avatar}" target="_blank">View Avatar</a>`);
+      break;
+
+    case 'domain':
+      if (entity.domain) detailsHTML += createMetadataField('Domain Name', entity.domain);
+      if (entity.ip) detailsHTML += createMetadataField('IP Address', entity.ip);
+      if (entity.hostingCountry) detailsHTML += createMetadataField('Hosting Country', entity.hostingCountry);
+      if (entity.hostingCity) detailsHTML += createMetadataField('Hosting City', entity.hostingCity);
+      if (entity.registrar) detailsHTML += createMetadataField('Registrar', entity.registrar);
+      if (entity.coordinates) detailsHTML += createMetadataField('Coordinates', entity.coordinates);
+      if (entity.googleMaps) detailsHTML += createMetadataField('Google Maps', `<a href="${entity.googleMaps}" target="_blank">View Location</a>`);
+      if (entity.whois) detailsHTML += createMetadataField('WHOIS Info', entity.whois);
+      if (entity.ssl) detailsHTML += createMetadataField('SSL Info', entity.ssl);
+      break;
+
+    case 'group':
+      if (entity.name) detailsHTML += createMetadataField('Group Name', entity.name);
+      if (entity.groupType) detailsHTML += createMetadataField('Type', entity.groupType);
+      if (entity.members && entity.members.length > 0) detailsHTML += createMetadataField('Known Members', entity.members.join(', '));
+      if (entity.region) detailsHTML += createMetadataField('Operating Region', entity.region);
+      if (entity.city) detailsHTML += createMetadataField('City', entity.city);
+      if (entity.country) detailsHTML += createMetadataField('Country', entity.country);
+      if (entity.coordinates) detailsHTML += createMetadataField('Coordinates', entity.coordinates);
+      break;
+
+    case 'username':
+      if (entity.usernames && entity.usernames.length > 0) detailsHTML += createMetadataField('Usernames', entity.usernames.join(', '));
+      if (entity.platforms && entity.platforms.length > 0) detailsHTML += createMetadataField('Associated Platforms', entity.platforms.join(', '));
+      if (entity.linkedEmails && entity.linkedEmails.length > 0) detailsHTML += createMetadataField('Linked Emails', entity.linkedEmails.join(', '));
+      if (entity.linkedWallets && entity.linkedWallets.length > 0) detailsHTML += createMetadataField('Linked Wallets', entity.linkedWallets.join(', '));
+      break;
+
+    case 'money':
+      if (entity.value) detailsHTML += createMetadataField('Value', entity.value);
+      if (entity.currency) detailsHTML += createMetadataField('Currency', entity.currency);
+      if (entity.associatedWallets && entity.associatedWallets.length > 0) detailsHTML += createMetadataField('Associated Wallets', entity.associatedWallets.join(', '));
+      break;
+
+    case 'email':
+      if (entity.emails && entity.emails.length > 0) detailsHTML += createMetadataField('Email Addresses', entity.emails.join(', '));
+      if (entity.owner) detailsHTML += createMetadataField('Owner', entity.owner);
+      if (entity.breaches) detailsHTML += createMetadataField('Breaches', entity.breaches);
+      break;
+
+    case 'phone':
+      if (entity.numbers && entity.numbers.length > 0) detailsHTML += createMetadataField('Phone Numbers', entity.numbers.join(', '));
+      if (entity.countryCode) detailsHTML += createMetadataField('Country Code', entity.countryCode);
+      if (entity.carrier) detailsHTML += createMetadataField('Carrier', entity.carrier);
+      if (entity.isVoip !== undefined) detailsHTML += createMetadataField('VOIP', entity.isVoip ? 'Yes' : 'No');
+      break;
+
+    case 'alias':
+      if (entity.aliases && entity.aliases.length > 0) detailsHTML += createMetadataField('Alias Names', entity.aliases.join(', '));
+      if (entity.realIdentity) detailsHTML += createMetadataField('Linked to Real Identity', entity.realIdentity);
+      if (entity.context) detailsHTML += createMetadataField('Context', entity.context);
+      break;
+
+    case 'document':
+      if (entity.filename) detailsHTML += createMetadataField('Filename', entity.filename);
+      if (entity.hashes && entity.hashes.length > 0) detailsHTML += createMetadataField('SHA256/MD5', entity.hashes.join(', '));
+      if (entity.fileType) detailsHTML += createMetadataField('File Type', entity.fileType);
+      if (entity.uploadedBy) detailsHTML += createMetadataField('Uploaded By', entity.uploadedBy);
+      break;
+
+    case 'malware':
+      if (entity.name) detailsHTML += createMetadataField('Name', entity.name);
+      if (entity.malwareType) detailsHTML += createMetadataField('Malware Type', entity.malwareType);
+      if (entity.hashes && entity.hashes.length > 0) detailsHTML += createMetadataField('Known Hashes', entity.hashes.join(', '));
+      if (entity.servers && entity.servers.length > 0) detailsHTML += createMetadataField('Known Servers', entity.servers.join(', '));
+      break;
   }
-  
-  if (entity.date) {
-    detailsHTML += `
-      <div class="entity-metadata-key">Date:</div>
-      <div class="entity-metadata-value">${entity.date}</div>
-    `;
-  }
-  
-  if (entity.time) {
-    detailsHTML += `
-      <div class="entity-metadata-key">Time:</div>
-      <div class="entity-metadata-value">${entity.time}</div>
-    `;
-  }
-  
-  if (entity.location) {
-    detailsHTML += `
-      <div class="entity-metadata-key">Location:</div>
-      <div class="entity-metadata-value">${entity.location}</div>
-    `;
-  }
-  
-  // Custom metadata
-  if (entity.metadata) {
-    Object.entries(entity.metadata).forEach(([key, value]) => {
-      detailsHTML += `
-        <div class="entity-metadata-key">${key}:</div>
-        <div class="entity-metadata-value">${value}</div>
-      `;
-    });
-  }
-  
+
   detailsHTML += `
       </div>
     </div>
   `;
-  
-  // Tags section
-  if (entity.tags && entity.tags.length > 0) {
+
+  // Custom metadata section
+  if (entity.metadata && Object.keys(entity.metadata).length > 0) {
     detailsHTML += `
       <div class="entity-section">
-        <div class="entity-section-title">Tags</div>
-        <div class="entity-tags">
+        <div class="entity-section-title">Custom Metadata</div>
+        <div class="entity-metadata">
     `;
-    
-    entity.tags.forEach(tag => {
-      detailsHTML += `<span class="entity-tag">${tag}</span>`;
+
+    Object.entries(entity.metadata).forEach(([key, value]) => {
+      detailsHTML += createMetadataField(key, value);
     });
-    
+
     detailsHTML += `
         </div>
       </div>
     `;
   }
-  
+
+  // Tags section
+  if (entity.tags && Array.isArray(entity.tags) && entity.tags.length > 0) {
+    detailsHTML += `
+      <div class="entity-section">
+        <div class="entity-section-title">Tags</div>
+        <div class="entity-tags">
+    `;
+
+    entity.tags.forEach(tag => {
+      if (tag.trim()) {
+        detailsHTML += `<span class="entity-tag">${tag}</span>`;
+      }
+    });
+
+    detailsHTML += `
+        </div>
+      </div>
+    `;
+  }
+
   // Image section
   if (entity.image) {
     detailsHTML += `
@@ -745,7 +1386,7 @@ function showEntityDetails(entityId) {
       </div>
     `;
   }
-  
+
   // Connections section
   if (entity.connections && entity.connections.length > 0) {
     detailsHTML += `
@@ -753,7 +1394,7 @@ function showEntityDetails(entityId) {
         <div class="entity-section-title">Connections</div>
         <div class="entity-connections">
     `;
-    
+
     entity.connections.forEach(connection => {
       const connectedEntity = getEntityById(connection.targetId);
       if (connectedEntity) {
@@ -773,13 +1414,13 @@ function showEntityDetails(entityId) {
         `;
       }
     });
-    
+
     detailsHTML += `
         </div>
       </div>
     `;
   }
-  
+
   // Actions section
   detailsHTML += `
     <div class="entity-actions">
@@ -788,10 +1429,10 @@ function showEntityDetails(entityId) {
       </button>
     </div>
   `;
-  
+
   // Update the details panel
   entityDetails.innerHTML = detailsHTML;
-  
+
   // Add event listeners for connections
   document.querySelectorAll('.connection-item').forEach(item => {
     // Click on connection to select entity
@@ -800,7 +1441,7 @@ function showEntityDetails(entityId) {
         selectEntity(item.getAttribute('data-id'));
       }
     });
-    
+
     // Edit connection button
     const editBtn = item.querySelector('.edit-connection-btn');
     if (editBtn) {
@@ -811,15 +1452,22 @@ function showEntityDetails(entityId) {
       });
     }
   });
-  
+
   // Add connection button
   document.getElementById('add-connection-btn').addEventListener('click', () => {
     showModal('add-connection-modal');
     populateEntitySelects(entityId);
   });
-  
+
   // Show the panel
   togglePanel('entity-panel', false, false);
+}
+
+function createMetadataField(key, value) {
+  return `
+    <div class="entity-metadata-key">${key}:</div>
+    <div class="entity-metadata-value">${value}</div>
+  `;
 }
 
 function showEditConnectionModal(sourceId, targetId) {

@@ -408,7 +408,7 @@
 
       </div>
 
-      <!-- Modals -->
+      <!-- Update the Add Entity Modal -->
       <div id="add-entity-modal" class="modal hidden">
         <div class="modal-content">
           <div class="modal-header">
@@ -423,49 +423,25 @@
                 <label for="entity-type">Entity Type</label>
                 <select id="entity-type" required>
                   <option value="">Select Type</option>
-                  <option value="person">Person</option>
-                  <option value="organization">Organization</option>
-                  <option value="wallet">Wallet Address</option>
-                  <option value="ip">IP Address</option>
-                  <option value="location">Location</option>
-                  <option value="transaction">Transaction ID</option>
-                  <option value="social">Social Media</option>
-                  <option value="domain">Domain/Website</option>
-                  <option value="money">Money Amount</option>
-                  <option value="group">Group</option>
-                  <option value="username">Username</option>
+                  <option value="person">👤 Person</option>
+                  <option value="organization">🏢 Organization</option>
+                  <option value="wallet">💸 Wallet Address</option>
+                  <option value="ip">🌍 IP Address</option>
+                  <option value="location">📍 Location</option>
+                  <option value="transaction">🔄 Transaction</option>
+                  <option value="social">📱 Social Media</option>
+                  <option value="domain">🌐 Domain/Website</option>
+                  <option value="group">👥 Group</option>
+                  <option value="username">🧑 Username</option>
+                  <option value="money">💰 Money Amount</option>
+                  <option value="email">📧 Email Address</option>
+                  <option value="phone">📞 Phone Number</option>
+                  <option value="alias">🔖 Alias</option>
+                  <option value="document">📁 Document/File/Hash</option>
+                  <option value="malware">🧪 Malware/Tool</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="entity-name">Name/Identifier</label>
-                <input type="text" id="entity-name" placeholder="Enter name or identifier" required>
-              </div>
-              <div class="form-group">
-                <label for="entity-label">Display Label</label>
-                <input type="text" id="entity-label" placeholder="Enter display label">
-              </div>
-              <div class="form-row">
-                <div class="form-group half">
-                  <label for="entity-date">Date</label>
-                  <input type="date" id="entity-date">
-                </div>
-                <div class="form-group half">
-                  <label for="entity-time">Time</label>
-                  <input type="time" id="entity-time">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="entity-location">Location</label>
-                <input type="text" id="entity-location" placeholder="Enter location">
-              </div>
-              <div class="form-group">
-                <label for="entity-tags">Tags (comma separated)</label>
-                <input type="text" id="entity-tags" placeholder="Enter tags">
-              </div>
-              <div class="form-group">
-                <label for="entity-description">Description</label>
-                <textarea id="entity-description" placeholder="Enter description"></textarea>
-              </div>
+              <!-- Dynamic fields will be inserted here -->
               <div class="form-group">
                 <label>Custom Metadata</label>
                 <div id="metadata-fields">

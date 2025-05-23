@@ -12,18 +12,32 @@ function createEntity(entityData) {
     name: entityData.name,
     label: entityData.label || entityData.name,
     description: entityData.description || '',
-    date: entityData.date || '',
-    time: entityData.time || '',
-    location: entityData.location || '',
-    tags: entityData.tags || [],
+    notes: entityData.notes || '',
+    tags: Array.isArray(entityData.tags) ? entityData.tags : [],
     metadata: entityData.metadata || {},
     image: entityData.image || '',
+    createdAt: new Date().toISOString(),
     connections: [],
-    createdAt: new Date().toISOString()
+    
+    // Dynamic fields based on type
+    ...getDynamicFields(entityData)
   };
   
   entities.push(entity);
   return entity;
+}
+
+function getDynamicFields(data) {
+  const fields = {};
+  
+  // Add all fields from the data object except specific ones we handle separately
+  Object.entries(data).forEach(([key, value]) => {
+    if (!['id', 'type', 'label', 'metadata', 'image', 'createdAt', 'connections'].includes(key)) {
+      fields[key] = value;
+    }
+  });
+  
+  return fields;
 }
 
 // Get entity by ID
@@ -41,10 +55,25 @@ function updateEntity(id, entityData) {
   const index = entities.findIndex(entity => entity.id === id);
   
   if (index !== -1) {
+    // Keep existing connections and ID
+    const existingConnections = entities[index].connections;
+    const existingId = entities[index].id;
+    
     entities[index] = {
-      ...entities[index],
-      ...entityData,
-      updatedAt: new Date().toISOString()
+      id: existingId,
+      type: entityData.type,
+      name: entityData.name,
+      label: entityData.label || entityData.name,
+      description: entityData.description || '',
+      notes: entityData.notes || '',
+      tags: Array.isArray(entityData.tags) ? entityData.tags : [],
+      metadata: entityData.metadata || {},
+      image: entityData.image || '',
+      connections: existingConnections,
+      updatedAt: new Date().toISOString(),
+      
+      // Dynamic fields based on type
+      ...getDynamicFields(entityData)
     };
     
     return entities[index];
@@ -62,20 +91,6 @@ function deleteEntity(id) {
   
   // Then, remove the entity itself
   entities = entities.filter(entity => entity.id !== id);
-}
-
-// Duplicate an entity
-function duplicateEntity(entity) {
-  const newEntity = {
-    ...entity,
-    id: uuidv4(),
-    label: `${entity.label} (Copy)`,
-    connections: [],
-    createdAt: new Date().toISOString()
-  };
-  
-  entities.push(newEntity);
-  return newEntity;
 }
 
 // Add a connection between entities
@@ -138,7 +153,12 @@ function getEntityIcon(type) {
     website: 'fa-desktop',
     money: 'fa-money-bill-wave',
     group: 'fa-users',
-    username: 'fa-user-tag'
+    username: 'fa-user-tag',
+    email: 'fa-envelope',
+    phone: 'fa-phone',
+    alias: 'fa-user-secret',
+    document: 'fa-file',
+    malware: 'fa-bug'
   };
   
   return iconMap[type] || 'fa-question';
@@ -156,7 +176,6 @@ export {
   getAllEntities,
   updateEntity,
   deleteEntity,
-  duplicateEntity,
   addEntityConnection,
   removeEntityConnection,
   getConnectedEntities,
