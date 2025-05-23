@@ -397,6 +397,31 @@ function resetGraph() {
   }
 }
 
+function saveGraphAsPNG() {
+  // Create a blob from the PNG data
+  const pngData = cy.png({
+    output: 'blob',
+    bg: getComputedStyle(document.body).getPropertyValue('--bg-primary'),
+    full: true,
+    scale: 2, // Higher quality
+    maxWidth: 4000,
+    maxHeight: 4000
+  });
+
+  // Create download link
+  const downloadLink = document.createElement('a');
+  downloadLink.href = URL.createObjectURL(pngData);
+  downloadLink.download = 'investigation-graph.png';
+  
+  // Trigger download
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  
+  // Cleanup
+  document.body.removeChild(downloadLink);
+  URL.revokeObjectURL(downloadLink.href);
+}
+
 export {
   initGraph,
   addNodeToGraph,
@@ -408,5 +433,6 @@ export {
   clearHighlights,
   findShortestPath,
   resetGraphView,
-  resetGraph
+  resetGraph,
+  saveGraphAsPNG
 };

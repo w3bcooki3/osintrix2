@@ -1,5 +1,4 @@
-// App functionality
-import { initGraph, addNodeToGraph, removeNodeFromGraph, addEdgeToGraph, removeEdgeFromGraph, findNode, highlightNode, clearHighlights, findShortestPath, resetGraphView, resetGraph } from './graph.js';
+import { initGraph, addNodeToGraph, removeNodeFromGraph, addEdgeToGraph, removeEdgeFromGraph, findNode, highlightNode, clearHighlights, findShortestPath, resetGraphView, resetGraph, saveGraphAsPNG } from './graph.js';
 import { createEntity, getEntityIcon, getEntityById, getAllEntities, deleteEntity, addEntityConnection, removeEntityConnection, updateEntity, setEntitiesData } from './entities.js';
 import { setupStorage, saveInvestigation, loadInvestigation, exportInvestigation, importInvestigation } from './utils/storage.js';
 import { initializePanels, togglePanel, closeAllPanels } from './ui/panels.js';
@@ -125,6 +124,11 @@ function setupEventListeners() {
 
   // Reset layout button
   document.getElementById('reset-layout-btn').addEventListener('click', resetGraphView);
+
+  // Add save graph button handler
+  document.getElementById('save-graph-btn').addEventListener('click', () => {
+    saveGraphAsPNG();
+  });
 
   // Add cancel button handler
   document.getElementById('cancel-add-entity').addEventListener('click', () => {
@@ -1498,8 +1502,7 @@ function updateConnection() {
     connection.label = label;
     
     // Update graph
-    const edgeId = `${sourceId}-${targetId}`;
-    const edge = findNode(edgeId);
+    const edge = findNode(`${sourceId}-${targetId}`);
     if (edge) {
       edge.data('label', label);
     }
