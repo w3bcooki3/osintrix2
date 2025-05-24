@@ -511,7 +511,50 @@ const DORK_CATEGORIES = {
             title: "WhatsApp Groups",
             description: "Find WhatsApp groups",
             query: 'site:wa.me/{keyword}'
+        },
+        {
+            title: "Cryto Wallets",
+            description: "Find crypto wallets",
+            query: "{username} wallet OR {username} address OR {username} public key",
+        },
+        {
+            title: "Crypto Transactions",
+            description: "Find crypto transactions",
+            query: "{username} transaction OR {username} tx OR {username} blockchain",
+        },
+        {
+            title: "Crypto Exchanges",
+            description: "Find crypto exchanges",
+            query: "{username} exchange OR {username} trading OR {username} market",
+        },
+        {
+            title: "Pastebin Posts",
+            description: "Find Pastebin posts",
+            query: 'site:pastebin.com "{keyword}" OR "{username}"'
+
+        },
+        {
+            title: "GitHub Repositories",
+            description: "Find GitHub repositories",
+            query: 'site:github.com "{username}" OR "{keyword}"'
+        },
+        {
+            title: "GitLab Repositories",
+            description: "Find GitLab repositories",
+            query: 'site:gitlab.com "{username}" OR "{keyword}"'
+        },
+        {
+            title: "Bitbucket Repositories",
+            description: "Find Bitbucket repositories",
+            query: 'site:bitbucket.org "{username}" OR "{keyword}"'
+        },
+        {
+            title: "Social Media Posts",
+            description: "Find social media posts",
+            query: 'site:{domain} "{keyword}" OR "{username}"'
         }
+
+
     ]
   },
   credentials: {
