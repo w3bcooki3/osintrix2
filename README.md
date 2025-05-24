@@ -1,122 +1,162 @@
 # 🕵️‍♂️ OSINT Graph Visualizer — Personal Cyber Investigation Tool
 
-> A client-side graph-based visualization tool for **OSINT, threat intelligence, and cryptocurrency fraud investigations**, built using **HTML, CSS, vanilla JavaScript**, and **Cytoscape.js** (no frameworks like React or Angular).
+[![Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/yourusername/osint-graph-visualizer)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Made with Vanilla JS](https://img.shields.io/badge/made%20with-Vanilla%20JS-yellow)](#)
+[![Frontend Only](https://img.shields.io/badge/backend-none-lightgrey)](#)
 
+> A browser-based graph visualizer for **OSINT, threat intelligence, and crypto investigations**, built entirely with **HTML, CSS, and vanilla JavaScript** — no frameworks or servers required.
 
 ---
 
-## 🎯 Project Overview
+## 🔍 Overview
 
-This is a **personal-use investigation tool** built for mapping complex relationships between people, wallets, domains, IPs, and more — designed to assist with:
+A lightweight, offline tool for visualizing connections between entities like people, domains, IPs, wallets, and more. Ideal for:
 
-- OSINT (Open Source Intelligence)
-- Blockchain/Cryptocurrency analysis
-- Threat actor profiling
-- Cybercrime investigations
+- Cybercrime & fraud investigations
+- Blockchain and wallet forensics
+- OSINT & threat actor research
+- Visual network mapping
 
-Built entirely with frontend technologies and uses **Cytoscape.js** for graph rendering and **Font Awesome** for iconography. No heavy frontend frameworks or build steps — fully browser-based.
-
-> 🚀 This is a personal project built with the help of **bolt.new AI** — still in active development. Expect bugs, fixes, and fresh features soon!
+Built for analysts, researchers, and enthusiasts who want full control without subscriptions or restrictions.
 
 ---
 
 ## ✨ Features
 
-### 🧠 Interactive Graph (via Cytoscape.js)
+### 🧠 Interactive Graph
 
+- Built with [Cytoscape.js](https://js.cytoscape.org/)
 - Drag, zoom, pan smoothly
-- Create custom nodes with metadata:
-  - 👤 Person
-  - 🏢 Organization
-  - 💸 Wallet Address
-  - 🌍 IP Address (flag icon)
-  - 📍 Location
-  - 🌐 Domains/Websites
-  - 🧾 Transaction IDs
-  - 📱 Social Media, Bank, Group, Username
-- Right-click context menu:
-  - Edit, Delete, Connect, Highlight
-- Labeled edges between entities
+- Rich context menu (Edit, Delete, Connect, Highlight)
+- Labelled edges with custom types
+- Find shortest/all paths between nodes
+- Group & collapse related nodes
 
-### 📑 Metadata Panels
+### 📑 Metadata & Panels
 
-- **Node Detail Panel (Top-Right)**:
-  - Shows selected node's full metadata: label, description, time/date, location, tags, image
-  - Image preview for QR codes, screenshots, or logos
+- **Node Detail Panel** (Top-Right)
+  - Displays all metadata, images, location links, tags
   - Edit/Delete node
-  - Connected nodes overview
+- **Entity List Panel** (Right)
+  - Click-to-focus, filter by type, auto-updates
+- **Notes Panel** (Bottom-Right)
+  - Rich text support (images, links, highlights)
+  - Resizable, dockable, exportable to HTML
 
-- **Entity List Panel (Right Half)**:
-  - Live list of all created entities
-  - Click to focus node
-  - Updates on create/delete
+### 🔗 Data Lookup Links Panel
 
-### 📝 Rich Notes Panel (Bottom-Right)
+> ✅ **Manually populated links** — not auto-generated  
+Quick-access to external OSINT tools and resources based on selected entity type (e.g., email lookup, domain WHOIS, wallet explorers).
 
-- Draggable, resizable notes section
-- Rich text editing:
-  - Bold, Italic, Underline, Font size, Bullet points, Highlight
-  - Add links, upload images
-- Can be minimized to bottom-right
-- **Exportable to clean HTML** for investigation reports
+### 🧠 Dorking Assistant
 
-### 🔎 Search & Filters
+Build and launch advanced Google/Shodan/Bing dorks for:
+- Login panels, misconfigs, leaked databases
+- Domain footprints, wallet mentions
+- Exposed IPs or technologies
 
-- Global search by label, type, or metadata
-- Filter graph by entity type (e.g., show only IPs or Wallets)
+Includes:
+- Prebuilt dork templates (email, wallet, domain, etc.)
+- Custom query builder
+- Copy to clipboard / open in new tab
 
-### 🛠️ Utility Features
+### 🔎 Search & Filter
 
-- Undo / Redo support
-- Light/Dark theme toggle
-- Save/Load investigations to local `.json` files
-- Export/Import investigation (includes images in base64)
-- Reset view
-- Collapsible node groups / subgraphs
+- Global search across all node data
+- Filter graph by entity type
+- Highlight results
+
+### 🛠️ Utilities
+
+- Save/Load from local JSON files
+- Export full graph with base64 images
+- Undo/Redo
+- Theme toggle (Light/Dark)
+- Reset camera view
+
+---
+
+## 📁 Supported Node Types
+
+- 👤 Person
+- 🏢 Organization
+- 💸 Wallet Address
+- 🌍 IP Address
+- 📍 Location
+- 🌐 Domain / Website
+- 📱 Social Media / Username / Group
+- 🔄 Transaction
+- 💰 Money Amount
+- 📧 Email Address
+- 📞 Phone Number
+- 🔖 Alias
+- 🔐 File / Hash / Evidence
+- 🐞 Malware / Tool
+
+Each with dynamic, context-specific metadata fields + optional custom fields.
 
 ---
 
 ## 🧾 Technologies Used
 
-| Tech             | Purpose                    |
-|------------------|-----------------------------|
-| HTML/CSS         | UI structure and styling    |
-| JavaScript (Vanilla) | Graph logic & interactivity |
-| **Cytoscape.js** | Graph rendering engine      |
-| **Font Awesome** | Entity icons and UI visuals |
+| Tech             | Role                         |
+|------------------|-------------------------------|
+| HTML/CSS         | UI and layout                 |
+| JavaScript       | Interactivity & logic         |
+| Cytoscape.js     | Graph rendering engine        |
+| Font Awesome     | Icons and visual enhancements |
 
-> No React, no frameworks, no build step.
-
----
-
-## ⚡ Why I Built This
-
-Most OSINT or investigation tools available today are either:
-- **Too expensive**, with premium features locked behind paywalls
-- **Too limited**, missing the flexibility or personal control I needed
-- Or they just didn’t *feel right* for the way I investigate
-
-So I built this tool myself — from scratch — with full control, no dependencies, and no costs involved.
-
-> This project was designed and developed by **bolt.new AI** — a personal initiative to create smarter, leaner tools without paying a cent.
+> No React, no build tools, no backend — fully portable and private.
 
 ---
 
-## 🚧 Project Status & Roadmap
+## 🚧 Roadmap & Status
 
-This project is still in active development.
+| Area        | Status        |
+|-------------|---------------|
+| Core Graph  | ✅ Stable      |
+| Notes Panel | ✅ Functional  |
+| Timeline    | 🛠️ Planned |
+| Dorking UI  | ✅ Added       |
+| Data Links  | ✅ Added |
+| Subgraphs   | 🛠️ Planned    |
+| Encryption  | 🛠️ Planned    |
 
-- 🐞 **Known Bugs**: Some minor bugs and quirks may be present during node editing, panel resizing, and metadata rendering.
-- 🧪 **Experimental Features**: Timeline view and rich text notes are functional but still evolving.
-- 🔧 **Planned Improvements**:
-  - Better layout controls
-  - Subgraph grouping/collapsing
-  - Real-time collaboration (in future versions)
-  - Encrypted project files (optional)
-  - Performance optimization for large graphs
-
-> ⚠️ Bug fixes and new features will be added regularly as I refine the tool based on real-world use.
+> 🔧 Ongoing improvements for performance, UX, and features based on real-world investigations.
 
 ---
 
+## 📸 Screenshots
 
+> _Coming Soon_: Example screenshots and graph samples.
+
+---
+
+## 🤝 Contributing
+
+This is a personal project built for investigative needs, but contributions are welcome!
+
+**To contribute:**
+1. Fork the repo
+2. Submit PRs for bugs, UI improvements, or new features
+3. Suggest links or dork templates
+
+> Please ensure pull requests are in plain HTML/CSS/JS (no frameworks).
+
+---
+
+## 🧠 Credits
+
+Created by **bolt.new AI** — a solo initiative to provide free, open, and investigative-first tooling to cybersecurity researchers, OSINT analysts, and digital forensics enthusiasts.
+
+> “This app was built as a free, private, and open-source alternative to paid OSINT tools. Expect bugs — improvements and new features are planned.”
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.  
+See [LICENSE](LICENSE) for details.
+
+---

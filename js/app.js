@@ -5,6 +5,7 @@ import { initializePanels, togglePanel, closeAllPanels } from './ui/panels.js';
 import { initializeNotes } from './ui/notes.js';
 import { initializeContextMenu } from './ui/contextMenu.js';
 import { initializeReportPanel } from './ui/reportPanel.js';
+import { initializeDorkAssistant } from './dork_assistant.js';
 
 // Application state
 let state = {
@@ -51,6 +52,7 @@ function initializeApp() {
   initializeContextMenu();
   initializeReportPanel();
   initializeMetadataFields();
+  initializeDorkAssistant();
 
   // Initialize storage
   setupStorage();
@@ -108,7 +110,16 @@ function addMetadataField(key = '', value = '') {
   metadataContainer.appendChild(fieldDiv);
 }
 
+function openDorkAssistantWithEntity(entityValue) {
+  // Clear existing clauses and add one with the passed entity value
+  window.openDorkAssistant([
+    { type: 'site', value: entityValue }
+  ]);
+}
+
+
 function setupEventListeners() {
+
   // Add entity button
   document.getElementById('add-entity-btn').addEventListener('click', () => {
     state.editMode = false;
@@ -885,9 +896,9 @@ function updateEntityFormFields() {
       
     case 'location':
       fields = [
-        { name: 'city', label: 'City', type: 'text', required: true },
-        { name: 'state', label: 'State', type: 'text' },
         { name: 'country', label: 'Country', type: 'text', required: true },
+        { name: 'city', label: 'City', type: 'text'},
+        { name: 'state', label: 'State', type: 'text' },
         { name: 'latitude', label: 'Latitude', type: 'text' },
         { name: 'longitude', label: 'Longitude', type: 'text' },
         { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }

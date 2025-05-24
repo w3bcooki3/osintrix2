@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Google Dorking Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            min-height: 600px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            padding: 30px 20px;
+            color: white;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+            color: #ecf0f1;
+        }
+
+        .category-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .category-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .category-item.active {
+            background: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .main-content {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-engine-select {
+            padding: 10px 15px;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .query-section {
+            display: none;
+        }
+
+        .query-section.active {
+            display: block;
+        }
+
+        .query-card {
+            background: white;
+            border: 1px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .query-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .query-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .query-description {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .query-text {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #e74c3c;
+            margin-bottom: 15px;
+            border-left: 4px solid #e74c3c;
+            word-break: break-all;
+        }
+
+        .query-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #27ae60;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        .notification.info {
+            background: #3498db;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .input-help {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .custom-query-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .custom-query-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .custom-form {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+            }
+            
+            .sidebar {
+                padding: 20px;
+            }
+            
+            .custom-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>🔍 Dork Categories</h2>
+            <div class="category-item active" data-category="information">
+                📊 Information Gathering
+            </div>
+            <div class="category-item" data-category="files">
+                📁 File Discovery
+            </div>
+            <div class="category-item" data-category="vulnerabilities">
+                🔓 Vulnerability Scanning
+            </div>
+            <div class="category-item" data-category="social">
+                👥 Social Media
+            </div>
+            <div class="category-item" data-category="credentials">
+                🔑 Credentials & Auth
+            </div>
+            <div class="category-item" data-category="database">
+                🗄️ Database Exposure
+            </div>
+            <div class="category-item" data-category="network">
+                🌐 Network Infrastructure
+            </div>
+            <div class="category-item" data-category="custom">
+                ⚙️ Custom Builder
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>Advanced Google Dorking Assistant</h1>
+                <div class="search-controls">
+                    <select class="search-engine-select" id="search-engine">
+                        <option value="google">Google</option>
+                        <option value="bing">Bing</option>
+                        <option value="yahoo">Yahoo</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="yandex">Yandex</option>
+                        <option value="shodan">Shodan</option>
+                        <option value="censys">Censys</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="showHistory()">📜 History</button>
+                    <button class="btn btn-success" onclick="exportQueries()">💾 Export</button>
+                    <button class="btn btn-danger" onclick="resetAll()">🔄 Reset</button>
+                </div>
+                <input type="text" class="search-input" placeholder="🔍 Search queries..." onkeyup="searchQueries(this.value)">
+            </div>
+
+            <!-- Custom Query Builder -->
+            <div class="query-section active" data-section="custom">
+                <div class="custom-query-section">
+                    <div class="custom-query-title">Custom Query Builder</div>
+                    <div class="custom-form">
+                        <div class="form-group">
+                            <label class="form-label">Search Operator</label>
+                            <select class="form-input" id="custom-operator">
+                                <option value="site:">site:</option>
+                                <option value="inurl:">inurl:</option>
+                                <option value="intitle:">intitle:</option>
+                                <option value="intext:">intext:</option>
+                                <option value="filetype:">filetype:</option>
+                                <option value="cache:">cache:</option>
+                                <option value="link:">link:</option>
+                                <option value="related:">related:</option>
+                                <option value="info:">info:</option>
+                                <option value="define:">define:</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Search Term</label>
+                            <input type="text" class="form-input" id="custom-term" placeholder="Enter search term">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Additional Terms (optional)</label>
+                            <input type="text" class="form-input" id="custom-additional" placeholder="Additional keywords">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="buildCustomQuery()">🔧 Build Query</button>
+                        </div>
+                    </div>
+                    <div id="custom-query-result" style="display: none;">
+                        <div class="query-text" id="custom-query-display"></div>
+                        <div class="query-actions">
+                            <button class="btn btn-success" onclick="copyCustomQuery()">📋 Copy</button>
+                            <button class="btn btn-primary" onclick="executeCustomQuery()">🚀 Execute</button>
+                            <button class="btn btn-secondary" onclick="editCustomQuery()">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Gathering -->
+            <div class="query-section active" data-section="information">
+                <div class="query-card" data-query='site:{TARGET_DOMAIN}'>
+                    <div class="query-title">Domain Information Discovery</div>
+                    <div class="query-description">Find all pages indexed for a specific domain</div>
+                    <div class="query-text">site:{TARGET_DOMAIN}</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intext:"{EMAIL}" OR intext:"{TARGET_NAME}"'>
+                    <div class="query-title">Personal Information Search</div>
+                    <div class="query-description">Search for personal information like email or name</div>
+                    <div class="query-text">intext:"{EMAIL}" OR intext:"{TARGET_NAME}"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='"{COMPANY}" employees OR staff OR team'>
+                    <div class="query-title">Company Employee Search</div>
+                    <div class="query-description">Find employee information for a specific company</div>
+                    <div class="query-text">"{COMPANY}" employees OR staff OR team</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Discovery -->
+            <div class="query-section" data-section="files">
+                <div class="query-card" data-query='site:{TARGET_DOMAIN} filetype:pdf'>
+                    <div class="query-title">PDF Files Discovery</div>
+                    <div class="query-description">Find PDF files on a specific domain</div>
+                    <div class="query-text">site:{TARGET_DOMAIN} filetype:pdf</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='filetype:xls OR filetype:xlsx "confidential"'>
+                    <div class="query-title">Sensitive Excel Files</div>
+                    <div class="query-description">Find potentially sensitive Excel spreadsheets</div>
+                    <div class="query-text">filetype:xls OR filetype:xlsx "confidential"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='filetype:doc OR filetype:docx "password" OR "login"'>
+                    <div class="query-title">Document Files with Credentials</div>
+                    <div class="query-description">Find Word documents that might contain passwords</div>
+                    <div class="query-text">filetype:doc OR filetype:docx "password" OR "login"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vulnerability Scanning -->
+            <div class="query-section" data-section="vulnerabilities">
+                <div class="query-card" data-query='inurl:"/admin" OR inurl:"/administrator"'>
+                    <div class="query-title">Admin Panel Discovery</div>
+                    <div class="query-description">Find admin panels and login pages</div>
+                    <div class="query-text">inurl:"/admin" OR inurl:"/administrator"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intext:"sql syntax near" OR intext:"syntax error has occurred" OR intext:"incorrect syntax near"'>
+                    <div class="query-title">SQL Error Pages</div>
+                    <div class="query-description">Find pages with SQL errors that might indicate vulnerabilities</div>
+                    <div class="query-text">intext:"sql syntax near" OR intext:"syntax error has occurred" OR intext:"incorrect syntax near"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intitle:"Index of /" "Parent Directory"'>
+                    <div class="query-title">Directory Listing</div>
+                    <div class="query-description">Find exposed directory listings</div>
+                    <div class="query-text">intitle:"Index of /" "Parent Directory"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="query-section" data-section="social">
+                <div class="query-card" data-query='site:linkedin.com "{TARGET_NAME}" OR "{COMPANY}"'>
+                    <div class="query-title">LinkedIn Profile Search</div>
+                    <div class="query-description">Find LinkedIn profiles for a person or company</div>
+                    <div class="query-text">site:linkedin.com "{TARGET_NAME}" OR "{COMPANY}"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='site:twitter.com "{USERNAME}" OR "{TARGET_NAME}"'>
+                    <div class="query-title">Twitter Profile Search</div>
+                    <div class="query-description">Find Twitter profiles and mentions</div>
+                    <div class="query-text">site:twitter.com "{USERNAME}" OR "{TARGET_NAME}"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='site:facebook.com "{TARGET_NAME}" OR "{COMPANY}"'>
+                    <div class="query-title">Facebook Search</div>
+                    <div class="query-description">Find Facebook profiles and pages</div>
+                    <div class="query-text">site:facebook.com "{TARGET_NAME}" OR "{COMPANY}"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials & Auth -->
+            <div class="query-section" data-section="credentials">
+                <div class="query-card" data-query='intext:"password" OR intext:"pwd" OR intext:"passwd" filetype:txt'>
+                    <div class="query-title">Password Files</div>
+                    <div class="query-description">Find text files that might contain passwords</div>
+                    <div class="query-text">intext:"password" OR intext:"pwd" OR intext:"passwd" filetype:txt</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='inurl:"login" OR inurl:"signin" OR inurl:"auth"'>
+                    <div class="query-title">Login Pages</div>
+                    <div class="query-description">Find login and authentication pages</div>
+                    <div class="query-text">inurl:"login" OR inurl:"signin" OR inurl:"auth"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='filetype:env "DB_PASSWORD" OR "API_KEY" OR "SECRET"'>
+                    <div class="query-title">Environment Files</div>
+                    <div class="query-description">Find environment files with sensitive data</div>
+                    <div class="query-text">filetype:env "DB_PASSWORD" OR "API_KEY" OR "SECRET"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Exposure -->
+            <div class="query-section" data-section="database">
+                <div class="query-card" data-query='filetype:sql "INSERT INTO" OR "CREATE TABLE"'>
+                    <div class="query-title">SQL Database Files</div>
+                    <div class="query-description">Find SQL database files and dumps</div>
+                    <div class="query-text">filetype:sql "INSERT INTO" OR "CREATE TABLE"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intext:"mysql_connect" OR intext:"mysqli_connect"'>
+                    <div class="query-title">MySQL Connection Strings</div>
+                    <div class="query-description">Find exposed MySQL connection code</div>
+                    <div class="query-text">intext:"mysql_connect" OR intext:"mysqli_connect"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intitle:"phpMyAdmin" "Welcome to phpMyAdmin"'>
+                    <div class="query-title">phpMyAdmin Instances</div>
+                    <div class="query-description">Find exposed phpMyAdmin installations</div>
+                    <div class="query-text">intitle:"phpMyAdmin" "Welcome to phpMyAdmin"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Infrastructure -->
+            <div class="query-section" data-section="network">
+                <div class="query-card" data-query='intitle:"RouterOS router configuration"'>
+                    <div class="query-title">Router Configuration</div>
+                    <div class="query-description">Find exposed router configurations</div>
+                    <div class="query-text">intitle:"RouterOS router configuration"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='inurl:":8080" OR inurl:":8443" OR inurl:":9090"'>
+                    <div class="query-title">Common Service Ports</div>
+                    <div class="query-description">Find services running on common alternative ports</div>
+                    <div class="query-text">inurl:":8080" OR inurl:":8443" OR inurl:":9090"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="query-card" data-query='intitle:"Network Camera" OR intitle:"Live View"'>
+                    <div class="query-title">Network Cameras</div>
+                    <div class="query-description">Find exposed network cameras and surveillance systems</div>
+                    <div class="query-text">intitle:"Network Camera" OR intitle:"Live View"</div>
+                    <div class="query-actions">
+                        <button class="btn btn-success" onclick="copyQuery(this)">📋 Copy</button>
+                        <button class="btn btn-primary" onclick="executeQuery(this)">🚀 Execute</button>
+                        <button class="btn btn-secondary" onclick="editQuery(this)">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing queries -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit Query</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Query Text</label>
+                <input type="text" class="form-input" id="edit-query-input">
+                <div class="input-help">Modify the search query as needed</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target/Placeholder</label>
+                <input type="text" class="form-input" id="edit-target-input" placeholder="e.g., example.com, John Doe">
+                <div class="input-help">Replace placeholders like {TARGET_DOMAIN} with actual values</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditedQuery()">Save & Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for history -->
+    <div class="modal" id="history-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Search History</div>
+            </div>
+            <div id="history-content">
+                <p>No search history available</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let searchHistory = JSON.parse(localStorage.getItem('dorkingHistory') || '[]');
+        let currentEditElement = null;
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadSavedQueries();
+        });
+
+        // Event listeners
+        function setupEventListeners() {
+            // Category switching
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    switchCategory(this.dataset.category);
+                });
+            });
+
+            // Modal close on backdrop click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal();
+                    }
+                });
+            });
+        }
+
+        // Category switching
+        function switchCategory(category) {
+            // Update active category
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+            // Show/hide sections
+            document.querySelectorAll('.query-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${category}"]`).classList.add('active');
+        }
+
+        // Copy query to clipboard
+        function copyQuery(element) {
+            const queryText = element.closest('.query-card').dataset.query;
+            navigator.clipboard.writeText(queryText).then(() => {
+                showNotification('Query copied to clipboard!', 'success');
+                addToHistory(queryText, 'copied');
+            }).catch(() => {
+                showNotification('Failed to copy query', 'error');
+            });
+        }
+
+        // Execute query in selected search engine
+        function executeQuery(element) {
+            const queryText = element.closest('.query-card').dataset.query;
+            const searchEngine = document.getElementById('search-engine').value;
+            
+            const searchUrls = {
+                google: `https://www.google.com/search?q=${encodeURIComponent(queryText)}`,
+                bing: `https://www.bing.com/search?q=${encodeURIComponent(queryText)}`,
+                yahoo: `https://search.yahoo.com/search?p=${encodeURIComponent(queryText)}`,
+                duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(queryText)}`,
+                yandex: `https://yandex.com/search/?text=${encodeURIComponent(queryText)}`,
+                shodan: `https://www.shodan.io/search?query=${encodeURIComponent(queryText)}`,
+                censys: `https://search.censys.io/search?resource=hosts&q=${encodeURIComponent(queryText)}`
+            };
+
+            if (searchUrls[searchEngine]) {
+                window.open(searchUrls[searchEngine], '_blank');
+                addToHistory(queryText, 'executed', searchEngine);
+                showNotification(`Query executed on ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}!`, 'success');
+            }
+        }
+
+        // Edit query
+        function editQuery(element) {
+            currentEditElement = element;
+            const queryText = element.closest('.query-card').dataset.query;
+            document.getElementById('edit-query-input').value = queryText;
+            document.getElementById('edit-target-input').value = '';
+            showModal('edit-modal');
+        }
+
+        // Save edited query
+        function saveEditedQuery() {
+            const editedQuery = document.getElementById('edit-query-input').value;
+            const targetValue = document.getElementById('edit-target-input').value;
+            
+            let finalQuery = editedQuery;
+            if (targetValue) {
+                // Replace common placeholders
+                finalQuery = finalQuery
+                    .replace(/{TARGET_DOMAIN}/g, targetValue)
+                    .replace(/{TARGET_NAME}/g, targetValue)
+                    .replace(/{COMPANY}/g, targetValue)
+                    .replace(/{EMAIL}/g, targetValue)
+                    .replace(/{USERNAME}/g, targetValue);
+            }
+
+            // Update the query card
+            if (currentEditElement) {
+                const queryCard = currentEditElement.closest('.query-card');
+                queryCard.dataset.query = finalQuery;
+                queryCard.querySelector('.query-text').textContent = finalQuery;
+            }
+
+            closeModal();
+            executeQuery(currentEditElement);
+        }
+
+        // Custom query builder
+        function buildCustomQuery() {
+            const operator = document.getElementById('custom-operator').value;
+            const term = document.getElementById('custom-term').value;
+            const additional = document.getElementById('custom-additional').value;
+
+            if (!term) {
+                showNotification('Please enter a search term', 'error');
+                return;
+            }
+
+            let customQuery = operator + term;
+            if (additional) {
+                customQuery += ' ' + additional;
+            }
+
+            document.getElementById('custom-query-display').textContent = customQuery;
+            document.getElementById('custom-query-result').style.display = 'block';
+            
+            // Store the custom query
+            document.getElementById('custom-query-result').dataset.query = customQuery;
+        }
+
+        // Copy custom query
+        function copyCustomQuery() {
+            const queryText = document.getElementById('custom-query-result').dataset.query;
+            navigator.clipboard.writeText(queryText).then(() => {
+                showNotification('Custom query copied to clipboard!', 'success');
+                addToHistory(queryText, 'copied');
+            });
+        }
+
+        // Execute custom query
+        function executeCustomQuery() {
+            const queryText = document.getElementById('custom-query-result').dataset.query;
+            const searchEngine = document.getElementById('search-engine').value;
+            
+            const searchUrls = {
+                google: `https://www.google.com/search?q=${encodeURIComponent(queryText)}`,
+                bing: `https://www.bing.com/search?q=${encodeURIComponent(queryText)}`,
+                yahoo: `https://search.yahoo.com/search?p=${encodeURIComponent(queryText)}`,
+                duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(queryText)}`,
+                yandex: `https://yandex.com/search/?text=${encodeURIComponent(queryText)}`,
+                shodan: `https://www.shodan.io/search?query=${encodeURIComponent(queryText)}`,
+                censys: `https://search.censys.io/search?resource=hosts&q=${encodeURIComponent(queryText)}`
+            };
+
+            if (searchUrls[searchEngine]) {
+                window.open(searchUrls[searchEngine], '_blank');
+                addToHistory(queryText, 'executed', searchEngine);
+                showNotification(`Custom query executed on ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}!`, 'success');
+            }
+        }
+
+        // Edit custom query
+        function editCustomQuery() {
+            document.getElementById('custom-query-result').style.display = 'none';
+        }
+
+        // Search queries
+        function searchQueries(searchTerm) {
+            const queryCards = document.querySelectorAll('.query-card');
+            searchTerm = searchTerm.toLowerCase();
+
+            queryCards.forEach(card => {
+                const title = card.querySelector('.query-title').textContent.toLowerCase();
+                const description = card.querySelector('.query-description').textContent.toLowerCase();
+                const query = card.querySelector('.query-text').textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || description.includes(searchTerm) || query.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // History management
+        function addToHistory(query, action, engine = null) {
+            const historyItem = {
+                query: query,
+                action: action,
+                engine: engine,
+                timestamp: new Date().toISOString()
+            };
+            
+            searchHistory.unshift(historyItem);
+            if (searchHistory.length > 100) {
+                searchHistory = searchHistory.slice(0, 100);
+            }
+            
+            localStorage.setItem('dorkingHistory', JSON.stringify(searchHistory));
+        }
+
+        function showHistory() {
+            const historyContent = document.getElementById('history-content');
+            
+            if (searchHistory.length === 0) {
+                historyContent.innerHTML = '<p>No search history available</p>';
+            } else {
+                historyContent.innerHTML = searchHistory.map(item => `
+                    <div class="query-card" style="margin-bottom: 10px;">
+                        <div class="query-text">${item.query}</div>
+                        <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">
+                            ${item.action} ${item.engine ? `on ${item.engine}` : ''} - 
+                            ${new Date(item.timestamp).toLocaleString()}
+                        </div>
+                        <div class="query-actions" style="margin-top: 10px;">
+                            <button class="btn btn-success" onclick="copyHistoryQuery('${item.query.replace(/'/g, "\\'")}')">📋 Copy</button>
+                            <button class="btn btn-primary" onclick="executeHistoryQuery('${item.query.replace(/'/g, "\\'")}')">🚀 Execute</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            showModal('history-modal');
+        }
+
+        function copyHistoryQuery(query) {
+            navigator.clipboard.writeText(query).then(() => {
+                showNotification('Query copied from history!', 'success');
+            });
+        }
+
+        function executeHistoryQuery(query) {
+            const searchEngine = document.getElementById('search-engine').value;
+            const searchUrls = {
+                google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+                bing: `https://www.bing.com/search?q=${encodeURIComponent(query)}`,
+                yahoo: `https://search.yahoo.com/search?p=${encodeURIComponent(query)}`,
+                duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
+                yandex: `https://yandex.com/search/?text=${encodeURIComponent(query)}`,
+                shodan: `https://www.shodan.io/search?query=${encodeURIComponent(query)}`,
+                censys: `https://search.censys.io/search?resource=hosts&q=${encodeURIComponent(query)}`
+            };
+
+            if (searchUrls[searchEngine]) {
+                window.open(searchUrls[searchEngine], '_blank');
+                addToHistory(query, 'executed', searchEngine);
+            }
+        }
+
+        function clearHistory() {
+            searchHistory = [];
+            localStorage.removeItem('dorkingHistory');
+            showNotification('History cleared!', 'info');
+            closeModal();
+        }
+
+        // Export functionality
+        function exportQueries() {
+            const allQueries = [];
+            document.querySelectorAll('.query-card').forEach(card => {
+                allQueries.push({
+                    title: card.querySelector('.query-title').textContent,
+                    description: card.querySelector('.query-description').textContent,
+                    query: card.dataset.query
+                });
+            });
+
+            const exportData = {
+                queries: allQueries,
+                history: searchHistory,
+                exportDate: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                type: 'application/json'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `google-dorks-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showNotification('Queries exported successfully!', 'success');
+        }
+
+        // Reset functionality
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all data? This will clear your history and custom queries.')) {
+                localStorage.clear();
+                searchHistory = [];
+                document.getElementById('custom-query-result').style.display = 'none';
+                document.getElementById('custom-term').value = '';
+                document.getElementById('custom-additional').value = '';
+                document.querySelector('.search-input').value = '';
+                
+                // Reset all query cards to original state
+                document.querySelectorAll('.query-card').forEach(card => {
+                    card.style.display = 'block';
+                });
+
+                showNotification('Application reset successfully!', 'info');
+            }
+        }
+
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('visible');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('visible');
+            });
+            currentEditElement = null;
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Load saved queries
+        function loadSavedQueries() {
+            // This would load any saved custom queries
+            // Implementation depends on requirements
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        exportQueries();
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        showHistory();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            resetAll();
+                        }
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

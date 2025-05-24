@@ -2083,3 +2083,63 @@ label[for].required::after {
   background: var(--neutral-600);
   border-color: var(--primary);
 }
+
+
+/* Toolbar button hover data */
+/* Tooltip container must be position: relative */
+.btn-icon {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Tooltip text */
+.btn-icon[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 130%; /* slightly below the button */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--neutral-900);
+  color: var(--neutral-50);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 9999;
+  user-select: none;
+  /* start slightly lower and fade in */
+  transform-origin: top center;
+}
+
+/* Show tooltip smoothly */
+.btn-icon[data-tooltip]:hover::after {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Arrow below the button */
+.btn-icon[data-tooltip]:hover::before {
+  content: "";
+  position: absolute;
+  top: 120%; /* just above the tooltip box */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px;
+  border-style: solid;
+  border-color: var(--neutral-900) transparent transparent transparent;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Show arrow smoothly */
+.btn-icon[data-tooltip]:hover::before {
+  opacity: 1;
+}
