@@ -341,6 +341,9 @@ input[type="time"],
 input[type="number"],
 input[type="email"],
 input[type="password"],
+input[type="tel"],
+input[type="url"],
+
 select,
 textarea {
   width: 100%;
@@ -351,6 +354,7 @@ textarea {
   color: var(--text-primary);
   font-size: 0.875rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-sm); /* Added box-shadow */
 }
 
 input:focus,
@@ -856,6 +860,51 @@ textarea {
   margin-bottom: 0;
 }
 
+/* Styling for checkboxes */
+input[type="checkbox"] {
+  /* Basic reset */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--neutral-400);
+  border-radius: var(--radius-sm);
+  background-color: var(--neutral-100);
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--primary); /* Primary color when checked */
+  border-color: var(--primary);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✔'; /* Checkmark symbol */
+  color: var(--neutral-50); /* White checkmark */
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Adjust label alignment for checkboxes if needed */
+label[for] {
+  display: flex;
+  align-items: center; /* Align label text with checkbox */
+  gap: var(--space-2);
+}
+
 .checkbox-group {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -1166,9 +1215,7 @@ textarea {
       color: var(--text-tertiary, #718096);
     }
 
-    .osintrix_report_field input,
-    .osintrix_report_field select,
-    .osintrix_report_field textarea {
+    .osintrix_report_field input, .osintrix_report_field select, .osintrix_report_field textarea {
       width: 100%;
       padding: 8px 12px;
       border: 1px solid var(--border-color, #e2e8f0);
@@ -1178,9 +1225,7 @@ textarea {
       font-size: 0.875rem;
     }
 
-    .osintrix_report_field input:focus,
-    .osintrix_report_field select:focus,
-    .osintrix_report_field textarea:focus {
+    .osintrix_report_field input:focus, .osintrix_report_field select:focus, .osintrix_report_field textarea:focus {
       outline: none;
       border-color: var(--primary, #4a5af8);
       box-shadow: 0 0 0 2px rgba(45, 91, 255, 0.2);
@@ -1304,6 +1349,23 @@ textarea {
       align-items: center;
       padding: 12px 16px;
       border-top: 1px solid var(--border-color, #e2e8f0);
+      background-color: var(--bg-secondary, #f5f7fa);
+      border-radius: 0 0 var(--radius-lg, 8px) var(--radius-lg, 8px);
+    }
+
+    .osintrix_report_export_button {
+      background-color: var(--primary, #4a5af8);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-md, 6px);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .osintrix_report_export_button:hover {
+      background-color: var(--primary-dark, #323ee6);
     }
 
 
@@ -2125,21 +2187,32 @@ label[for].required::after {
 
 /* Arrow below the button */
 .btn-icon[data-tooltip]:hover::before {
-  content: "";
+  content: '';
   position: absolute;
-  top: 120%; /* just above the tooltip box */
+  top: 120%; /* adjust to align with the tooltip */
   left: 50%;
-  transform: translateX(-50%);
-  border-width: 7px;
-  border-style: solid;
-  border-color: var(--neutral-900) transparent transparent transparent;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background-color: var(--neutral-900);
+  z-index: 9998;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 9999;
 }
 
-/* Show arrow smoothly */
 .btn-icon[data-tooltip]:hover::before {
   opacity: 1;
+}
+
+.new-feature-badge {
+  background-color: var(--accent);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  vertical-align: super;
+  text-transform: uppercase;
 }

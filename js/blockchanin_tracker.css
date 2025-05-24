@@ -1,0 +1,186 @@
+/* Basic Styling for the App (optional, for demo) */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+#openViewerBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+/* Full-Width Popup Panel Styles */
+.popup-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+    visibility: hidden; /* Hidden by default */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease-in-out;
+}
+
+.popup-panel.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.panel-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%; /* Full width effect */
+    max-width: 900px; /* Max width to prevent it from getting too wide on large screens */
+    max-height: 90%; /* Prevent content from overflowing */
+    overflow-y: auto; /* Enable scrolling if content is too long */
+    position: relative;
+    transform: translateY(20px); /* Slight animation on open */
+    transition: transform 0.3s ease-in-out;
+}
+
+.popup-panel.active .panel-content {
+    transform: translateY(0);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #333;
+}
+
+.close-btn:hover {
+    color: #f00;
+}
+
+h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-section label {
+    font-weight: bold;
+    min-width: 150px;
+}
+
+.input-section input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    min-width: 250px; /* Ensure input is not too small */
+}
+
+.input-section button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.input-section button:hover {
+    background-color: #218838;
+}
+
+#loading, .error-message {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+#loading {
+    background-color: #e9ecef;
+    color: #555;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.hidden {
+    display: none;
+}
+
+.transactions-section, .simple-flow-section {
+    margin-top: 25px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.transactions-section h3, .simple-flow-section h3 {
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+#transactionList, #simpleFlowList {
+    list-style: none;
+    padding: 0;
+}
+
+#transactionList li, #simpleFlowList li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    word-wrap: break-word; /* Ensure long addresses wrap */
+}
+
+#transactionList li strong, #simpleFlowList li strong {
+    color: #333;
+}
+
+#transactionList li .tx-id {
+    font-size: 0.9em;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .panel-content {
+        width: 95%;
+        padding: 15px;
+    }
+    .input-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .input-section label {
+        min-width: unset;
+    }
+    .input-section input[type="text"] {
+        min-width: unset;
+    }
+}

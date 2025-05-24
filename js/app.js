@@ -67,7 +67,7 @@ function initializeApp() {
   setupEventListeners();
 
   // Toggle panels for initial view
-  togglePanel('entity-list-panel', false);
+  togglePanel('entity-list-panel', false, true); // Changed last argument to true to keep it collapsed initially
   
   state.isInitialLoad = false;
 }
@@ -76,7 +76,7 @@ function initializeMetadataFields() {
   const addMetadataBtn = document.getElementById('add-metadata-field');
   const metadataContainer = document.getElementById('metadata-fields');
   
-  if (!addMetadataBtn || !metadataContainer) return;
+  if (!addMetadataBtn || !metadataContainer) return; //
   
   addMetadataBtn.addEventListener('click', () => {
     addMetadataField();
@@ -125,6 +125,7 @@ function setupEventListeners() {
     state.editMode = false;
     showModal('add-entity-modal');
     populateEntitySelects();
+    resetAddEntityForm(); // Ensure form is reset when adding new
   });
 
   // Add connection button in toolbar
@@ -432,7 +433,127 @@ function hideModal(modalId) {
   modal.classList.add('hidden');
 }
 
+function validateForm(form) {
+  const inputs = form.querySelectorAll('input[type="text"], input[type="url"], input[type="email"], input[type="tel"], input[type="number"], textarea');
+  let isValid = true;
+
+  inputs.forEach(input => {
+    if (input.hasAttribute('pattern') && input.value) {
+      const pattern = new RegExp(input.getAttribute('pattern'));
+      if (!pattern.test(input.value)) {
+        isValid = false;
+        input.classList.add('is-invalid');
+        alert(`Invalid input for ${input.id}: ${input.title}`);
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    }
+    // Add check for required fields that might not have a pattern
+    if (input.hasAttribute('required') && !input.value.trim()) {
+      isValid = false;
+      input.classList.add('is-invalid');
+      // No alert here, as browser's validation will typically handle this
+    } else if (input.hasAttribute('required') && input.value.trim()) {
+      input.classList.remove('is-invalid');
+    }
+  });
+
+  // Validate repeatable fields
+  form.querySelectorAll('.repeatable-group').forEach(group => {
+    const repeatableInputs = group.querySelectorAll('input');
+    const fieldName = group.dataset.name;
+    const validationRule = getValidationRuleForRepeatable(fieldName);
+
+    repeatableInputs.forEach(input => {
+      if (input.value && validationRule && !validationRule.pattern.test(input.value)) {
+        isValid = false;
+        input.classList.add('is-invalid');
+        alert(`Invalid input for ${fieldName}: ${validationRule.title}`);
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+  });
+
+  return isValid;
+}
+
+// Helper to get validation rules for repeatable fields
+function getValidationRuleForRepeatable(fieldName) {
+  const entityType = document.getElementById('entity-type').value;
+  let validationRules = {};
+
+  // Define validation rules for repeatable fields
+  switch (entityType) {
+    case 'person':
+      validationRules = {
+        usernames: { pattern: /^[a-zA-Z0-9_.]+$/, title: 'Only letters, numbers, underscores, or periods.' },
+        phones: { pattern: /^\+?[0-9\s\-\(\)]{7,20}$/, title: 'Valid phone number format (e.g., +1234567890).' },
+        emails: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, title: 'Valid email format (e.g., example@domain.com).' },
+        wallets: { pattern: /^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$/, title: 'Valid cryptocurrency wallet address.' }
+      };
+      break;
+    case 'wallet':
+      validationRules = {
+        transactions: { pattern: /^[a-fA-F0-9]{64}$/, title: 'Valid transaction ID/Hash.' } // Common hash pattern
+      };
+      break;
+    case 'group':
+      validationRules = {
+        members: { pattern: /^.+$/, title: 'Member name cannot be empty.' }
+      };
+      break;
+    case 'username':
+      validationRules = {
+        usernames: { pattern: /^[a-zA-Z0-9_.]+$/, title: 'Only letters, numbers, underscores, or periods.' },
+        platforms: { pattern: /^.+$/, title: 'Platform name cannot be empty.' },
+        linkedEmails: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, title: 'Valid email format (e.g., example@domain.com).' },
+        linkedWallets: { pattern: /^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$/, title: 'Valid cryptocurrency wallet address.' }
+      };
+      break;
+    case 'money':
+      validationRules = {
+        associatedWallets: { pattern: /^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$/, title: 'Valid cryptocurrency wallet address.' }
+      };
+      break;
+    case 'email':
+      validationRules = {
+        emails: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, title: 'Valid email format (e.g., example@domain.com).' }
+      };
+      break;
+    case 'phone':
+      validationRules = {
+        numbers: { pattern: /^\+?[0-9\s\-\(\)]{7,20}$/, title: 'Valid phone number format (e.g., +1234567890).' }
+      };
+      break;
+    case 'alias':
+      validationRules = {
+        aliases: { pattern: /^.+$/, title: 'Alias name cannot be empty.' }
+      };
+      break;
+    case 'document':
+      validationRules = {
+        hashes: { pattern: /^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$/, title: 'Valid MD5, SHA1, or SHA256 hash.' }
+      };
+      break;
+    case 'malware':
+      validationRules = {
+        hashes: { pattern: /^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$/, title: 'Valid MD5, SHA1, or SHA256 hash.' },
+        servers: { pattern: /^((https?|ftp):\/\/)?([\w_-]+(?:\.[\w_-]+)+)([a-zA-Z0-9.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/, title: 'Valid URL or IP address for a server.' }
+      };
+      break;
+  }
+  return validationRules[fieldName];
+}
+
+
 function addNewEntity() {
+  const form = document.getElementById('add-entity-form');
+  if (!validateForm(form)) {
+    alert('Please correct the invalid fields before adding the entity.');
+    return;
+  }
+
   const type = document.getElementById('entity-type').value;
   if (!type) return;
 
@@ -595,13 +716,16 @@ function resetAddEntityForm() {
   
   // Reset edit mode
   state.editMode = false;
+
+  // Remove validation styles
+  form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 }
 
 function editEntity(entityId) {
-  if (!entityId) return;
+  if (!entityId) return; //
   
   const entity = getEntityById(entityId);
-  if (!entity) return;
+  if (!entity) return; //
   
   // Set edit mode
   state.editMode = true;
@@ -678,6 +802,12 @@ function editEntity(entityId) {
 }
 
 function updateExistingEntity() {
+  const form = document.getElementById('add-entity-form');
+  if (!validateForm(form)) {
+    alert('Please correct the invalid fields before updating the entity.');
+    return;
+  }
+
   const entityId = state.selectedEntityId;
   if (!entityId) return;
 
@@ -847,28 +977,28 @@ function updateEntityFormFields() {
     case 'person':
       fields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text' },
+        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text', pattern: '^[a-zA-Z0-9_.]+$', title: 'Only letters, numbers, underscores, or periods.' },
         { name: 'dob', label: 'Date of Birth', type: 'date' },
         { name: 'nationality', label: 'Nationality', type: 'text' },
         { name: 'city', label: 'City', type: 'text' },
         { name: 'country', label: 'Country', type: 'text' },
-        { name: 'phones', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel' },
-        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email' },
-        { name: 'wallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text' },
-        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text' },
-        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+        { name: 'phones', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel', pattern: '^\\+?[0-9\\s\\-\\(]{7,20}$', title: 'Valid phone number format (e.g., +1234567890).' },
+        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email', pattern: '^[^\s@]+@[^\s@]+\\.[^\s@]+$', title: 'Valid email format (e.g., example@domain.com).' },
+        { name: 'wallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text', pattern: '^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$', title: 'Valid cryptocurrency wallet address.' },
+        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text', pattern: '^(?:-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$|Latitude:\s*-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*Longitude:\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?))$' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url', title: 'Valid Google Maps URL.' }
       ];
       break;
       
     case 'organization':
       fields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'website', label: 'Website', type: 'url' },
+        { name: 'website', label: 'Website', type: 'url', pattern: '^http?://([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$', title: 'Valid URL format (e.g., https://example.com).' },
         { name: 'country', label: 'Country', type: 'text' },
         { name: 'hqAddress', label: 'HQ Address', type: 'text' },
         { name: 'city', label: 'City', type: 'text' },
-        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text' },
-        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+        { name: 'coordinates', label: 'Coordinates (lat,lng)', type: 'text', pattern: '^(?:-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$|Latitude:\s*-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*Longitude:\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?))$' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url', title: 'Valid Google Maps URL.' }
       ];
       break;
       
@@ -876,17 +1006,16 @@ function updateEntityFormFields() {
       fields = [
         { name: 'blockchain', label: 'Blockchain', type: 'text', required: true },
         { name: 'address', label: 'Address', type: 'text', required: true },
-        
         { name: 'owner', label: 'Known Owner', type: 'text' },
         { name: 'exchange', label: 'Exchange Used', type: 'text' },
-        { name: 'transactions', label: 'Linked Transactions', type: 'repeatable', inputType: 'text' }
+        { name: 'transactions', label: 'Linked Transactions', type: 'repeatable', inputType: 'text', pattern: '^[a-fA-F0-9]{64}$', title: 'Valid transaction ID/Hash (e.g., SHA256).' }
       ];
       break;
       
     case 'ip':
       fields = [
-        { name: 'ip', label: 'IP', type: 'text', required: true },
-        { name: 'asn', label: 'ASN', type: 'text' },
+        { name: 'ip', label: 'IP', type: 'text', required: true, pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$', title: 'Valid IPv4 or IPv6 address.' },
+        { name: 'asn', label: 'ASN', type: 'text', pattern: '^AS\\d+$|^\\d+$', title: 'Valid ASN (e.g., AS12345 or 12345).' },
         { name: 'country', label: 'Country', type: 'text' },
         { name: 'city', label: 'City', type: 'text' },
         { name: 'isp', label: 'ISP/Hostname', type: 'text' },
@@ -899,19 +1028,19 @@ function updateEntityFormFields() {
         { name: 'country', label: 'Country', type: 'text', required: true },
         { name: 'city', label: 'City', type: 'text'},
         { name: 'state', label: 'State', type: 'text' },
-        { name: 'latitude', label: 'Latitude', type: 'text' },
-        { name: 'longitude', label: 'Longitude', type: 'text' },
-        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' }
+        { name: 'latitude', label: 'Latitude', type: 'text', pattern: '^-?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$', title: 'Valid latitude (-90 to 90).' },
+        { name: 'longitude', label: 'Longitude', type: 'text', pattern: '^-?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$', title: 'Valid longitude (-180 to 180).' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url', title: 'Valid Google Maps URL.' }
       ];
       break;
       
     case 'transaction':
       fields = [
-        { name: 'txId', label: 'Transaction ID/Hash', type: 'text', required: true },
+        { name: 'txId', label: 'Transaction ID/Hash', type: 'text', required: true, pattern: '^[a-fA-F0-9]{64}$', title: 'Valid transaction ID/Hash (e.g., SHA256).' },
         { name: 'platform', label: 'Platform', type: 'text' },
         { name: 'fromWallet', label: 'From Wallet', type: 'text' },
         { name: 'toWallet', label: 'To Wallet', type: 'text' },
-        { name: 'amount', label: 'Amount', type: 'text' },
+        { name: 'amount', label: 'Amount', type: 'text', pattern: '^\\d+(\\.\\d+)?$', title: 'Numeric value.' },
         { name: 'currency', label: 'Currency', type: 'text' },
         { name: 'timestamp', label: 'Timestamp', type: 'datetime-local' },
         { name: 'country', label: 'Exchange/Platform Country', type: 'text' }
@@ -922,20 +1051,20 @@ function updateEntityFormFields() {
       fields = [
         { name: 'username', label: 'Username/Handle', type: 'text', required: true },
         { name: 'platform', label: 'Platform', type: 'text', required: true },
-        { name: 'profileUrl', label: 'Profile URL', type: 'url' },
-        { name: 'avatar', label: 'Avatar URL', type: 'url' }
+        { name: 'profileUrl', label: 'Profile URL', type: 'url', pattern: '^https?://([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$', title: 'Valid URL format (e.g., https://example.com).' },
+        { name: 'avatar', label: 'Avatar URL', type: 'url', pattern: '^https?://([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$', title: 'Valid URL format (e.g., https://example.com).' }
       ];
       break;
       
     case 'domain':
       fields = [
-        { name: 'domain', label: 'Domain Name', type: 'text', required: true },
-        { name: 'ip', label: 'IP Address', type: 'text' },
+        { name: 'domain', label: 'Domain Name', type: 'text', required: true, pattern: '^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$', title: 'Valid domain name (e.g., example.com).' },
+        { name: 'ip', label: 'IP Address', type: 'text', pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$', title: 'Valid IPv4 or IPv6 address.' },
         { name: 'hostingCountry', label: 'Hosting Country', type: 'text' },
         { name: 'hostingCity', label: 'Hosting City', type: 'text' },
         { name: 'registrar', label: 'Registrar', type: 'text' },
-        { name: 'coordinates', label: 'Coordinates', type: 'text' },
-        { name: 'googleMaps', label: 'Google Maps Link', type: 'url' },
+        { name: 'coordinates', label: 'Coordinates', type: 'text', pattern: '^(?:-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$|Latitude:\s*-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*Longitude:\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?))$' },
+        { name: 'googleMaps', label: 'Google Maps Link', type: 'url', title: 'Valid Google Maps URL.' },
         { name: 'whois', label: 'WHOIS Info', type: 'textarea' },
         { name: 'ssl', label: 'SSL Info', type: 'textarea' }
       ];
@@ -949,30 +1078,30 @@ function updateEntityFormFields() {
         { name: 'region', label: 'Operating Region', type: 'text' },
         { name: 'city', label: 'City', type: 'text' },
         { name: 'country', label: 'Country', type: 'text' },
-        { name: 'coordinates', label: 'Coordinates', type: 'text' }
+        { name: 'coordinates', label: 'Coordinates', type: 'text', pattern: '^(?:-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$|Latitude:\s*-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*Longitude:\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?))$' }
       ];
       break;
       
     case 'username':
       fields = [
-        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text', required: true },
+        { name: 'usernames', label: 'Usernames', type: 'repeatable', inputType: 'text', required: true, pattern: '^[a-zA-Z0-9_.]+$', title: 'Only letters, numbers, underscores, or periods.' },
         { name: 'platforms', label: 'Associated Platforms', type: 'repeatable', inputType: 'text' },
-        { name: 'linkedEmails', label: 'Linked Emails', type: 'repeatable', inputType: 'email' },
-        { name: 'linkedWallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text' }
+        { name: 'linkedEmails', label: 'Linked Emails', type: 'repeatable', inputType: 'email', pattern: '^[^\s@]+@[^\s@]+\\.[^\s@]+$', title: 'Valid email format (e.g., example@domain.com).' },
+        { name: 'linkedWallets', label: 'Linked Wallets', type: 'repeatable', inputType: 'text', pattern: '^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$', title: 'Valid cryptocurrency wallet address.' }
       ];
       break;
       
     case 'money':
       fields = [
-        { name: 'value', label: 'Value', type: 'number', required: true },
+        { name: 'value', label: 'Value', type: 'number', required: true, pattern: '^\\d+(\\.\\d+)?$', title: 'Numeric value (e.g., 100.50).' },
         { name: 'currency', label: 'Currency', type: 'text', required: true },
-        { name: 'associatedWallets', label: 'Associated Wallets', type: 'repeatable', inputType: 'text' }
+        { name: 'associatedWallets', label: 'Associated Wallets', type: 'repeatable', inputType: 'text', pattern: '^(0x)?[0-9a-fA-F]{40}$|^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[LM3][a-km-zA-HJ-NP-Z0-9]{26,33}$|^[4789][A-Za-z0-9]{93,105}$', title: 'Valid cryptocurrency wallet address.' }
       ];
       break;
       
     case 'email':
       fields = [
-        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email', required: true },
+        { name: 'emails', label: 'Email Addresses', type: 'repeatable', inputType: 'email', required: true, pattern: '^[^\s@]+@[^\s@]+\\.[^\s@]+$', title: 'Valid email format (e.g., example@domain.com).' },
         { name: 'owner', label: 'Owner', type: 'text' },
         { name: 'breaches', label: 'Breaches', type: 'textarea' }
       ];
@@ -980,8 +1109,8 @@ function updateEntityFormFields() {
       
     case 'phone':
       fields = [
-        { name: 'numbers', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel', required: true },
-        { name: 'countryCode', label: 'Country Code', type: 'text' },
+        { name: 'numbers', label: 'Phone Numbers', type: 'repeatable', inputType: 'tel', required: true, pattern: '^\\+?[0-9\\s\\-\\(]{7,20}$', title: 'Valid phone number format (e.g., +1234567890).' },
+        { name: 'countryCode', label: 'Country Code', type: 'text', pattern: '^\\+[1-9]\\d{0,3}$', title: 'Valid country code (e.g., +1, +44).' },
         { name: 'carrier', label: 'Carrier', type: 'text' },
         { name: 'isVoip', label: 'VOIP', type: 'checkbox' }
       ];
@@ -998,7 +1127,7 @@ function updateEntityFormFields() {
     case 'document':
       fields = [
         { name: 'filename', label: 'Filename', type: 'text', required: true },
-        { name: 'hashes', label: 'SHA256/MD5', type: 'repeatable', inputType: 'text' },
+        { name: 'hashes', label: 'SHA256/MD5', type: 'repeatable', inputType: 'text', pattern: '^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$', title: 'Valid MD5 (32 chars), SHA1 (40 chars), or SHA256 (64 chars) hash.' },
         { name: 'fileType', label: 'File Type', type: 'text' },
         { name: 'uploadedBy', label: 'Uploaded By', type: 'text' }
       ];
@@ -1008,8 +1137,8 @@ function updateEntityFormFields() {
       fields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'malwareType', label: 'Malware Type', type: 'text' },
-        { name: 'hashes', label: 'Known Hashes', type: 'repeatable', inputType: 'text' },
-        { name: 'servers', label: 'Known Servers', type: 'repeatable', inputType: 'text' }
+        { name: 'hashes', label: 'Known Hashes', type: 'repeatable', inputType: 'text', pattern: '^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$', title: 'Valid MD5 (32 chars), SHA1 (40 chars), or SHA256 (64 chars) hash.' },
+        { name: 'servers', label: 'Known Servers', type: 'repeatable', inputType: 'text', pattern: '^((https?|ftp):\\/\\/)?([\\w_-]+(?:\\.[\\w_-]+)+)([a-zA-Z0-9.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])?$', title: 'Valid URL or IP address for a server.' }
       ];
       break;
   }
@@ -1033,7 +1162,7 @@ function updateEntityFormFields() {
       repeatableGroup.dataset.name = field.name;
       
       // Add initial input
-      const inputGroup = createRepeatableInput(field.name, field.inputType);
+      const inputGroup = createRepeatableInput(field.name, field.inputType, field.pattern, field.title);
       repeatableGroup.appendChild(inputGroup);
       
       // Add button
@@ -1042,7 +1171,7 @@ function updateEntityFormFields() {
       addBtn.className = 'btn-secondary add-field';
       addBtn.innerHTML = '<i class="fas fa-plus"></i> Add Another';
       addBtn.onclick = () => {
-        const newInput = createRepeatableInput(field.name, field.inputType);
+        const newInput = createRepeatableInput(field.name, field.inputType, field.pattern, field.title);
         repeatableGroup.insertBefore(newInput, addBtn);
       };
       
@@ -1057,6 +1186,10 @@ function updateEntityFormFields() {
       } else {
         input = document.createElement('input');
         input.type = field.type;
+        if (field.pattern) {
+          input.setAttribute('pattern', field.pattern);
+          input.setAttribute('title', field.title);
+        }
       }
       
       input.id = field.name;
@@ -1080,7 +1213,7 @@ function updateEntityFormFields() {
   formGroup.parentNode.insertBefore(newDynamicFields, formGroup.nextSibling);
 }
 
-function createRepeatableInput(name, type) {
+function createRepeatableInput(name, type, pattern = '', title = '') {
   const inputGroup = document.createElement('div');
   inputGroup.className = 'input-group';
   
@@ -1088,6 +1221,10 @@ function createRepeatableInput(name, type) {
   input.type = type || 'text';
   input.name = `${name}[]`;
   input.className = 'form-control';
+  if (pattern) {
+    input.setAttribute('pattern', pattern);
+    input.setAttribute('title', title);
+  }
   
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
@@ -1489,7 +1626,7 @@ function showEditConnectionModal(sourceId, targetId) {
   const sourceEntity = getEntityById(sourceId);
   const connection = sourceEntity.connections.find(conn => conn.targetId === targetId);
   
-  if (!connection) return;
+  if (!connection) return; //
   
   // Populate form
   document.getElementById('edit-connection-source').value = sourceId;
@@ -1553,7 +1690,7 @@ function deleteConnection() {
 }
 
 function deleteSelectedEntity() {
-  if (!state.selectedEntityId) return;
+  if (!state.selectedEntityId) return; //
   
   if (confirm(`Are you sure you want to delete this entity?`)) {
     // Remove from graph
@@ -1656,7 +1793,7 @@ function addNewConnection() {
 
 function handleImageUpload(event) {
   const file = event.target.files[0];
-  if (!file) return;
+  if (!file) return; //
   
   const reader = new FileReader();
   

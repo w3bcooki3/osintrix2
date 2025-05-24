@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="./css/dork_assistant.css" />
   </head>
   <body>
-    <!-- Welcome Screen -->
     <div id="welcome-screen">
       <div class="welcome-content">
         <div class="welcome-logo">
@@ -24,9 +23,7 @@
         </div>
       </div>
     </div>
-    <!-- Main App -->
     <div id="app" class="hidden">
-      <!-- Header -->
       <header class="app-header">
         <div class="logo">
           <i class="fas fa-network-wired"></i>
@@ -71,17 +68,17 @@
             <button id="toggle-dork-btn" class="btn-icon" data-tooltip="Dork Assistant">
               <i class="fas fa-search-plus"></i>
             </button>
+            <button id="toggle-whois-btn" class="btn-icon" data-tooltip="Domain/IP Lookup">
+              <i class="fas fa-globe"></i>
+            </button>
             <button id="theme-toggle-btn" class="btn-icon" data-tooltip="Toggle Dark/Light Theme">
               <i class="fas fa-moon"></i>
             </button>
           </div>
         </div>
       </header>
-      <!-- Main Content -->
       <div class="app-content">
-        <!-- Graph Container -->
         <div id="graph-container"></div>
-        <!-- Entity List Panel -->
         <div id="entity-list-panel" class="panel">
           <div class="panel-header">
             <h3>Entities</h3>
@@ -135,11 +132,10 @@
               </div>
             </div>
             <ul id="entity-list" class="entity-list">
-              <!-- Entities will be populated here -->
-            </ul>
+              </ul>
           </div>
         </div>
-        <!-- Entity Detail Panel -->
+
         <div id="entity-panel" class="panel hidden">
           <div class="panel-header">
             <h3>Entity Details</h3>
@@ -157,11 +153,9 @@
           </div>
           <div class="panel-content">
             <div id="entity-details" class="entity-details">
-              <!-- Entity details will be populated here -->
-            </div>
+              </div>
           </div>
         </div>
-        <!-- Update the notes panel section in index.html -->
         <div id="notes-panel" class="panel hidden">
           <div class="panel-header">
             <div class="notes-title">
@@ -230,7 +224,6 @@
                 <i class="fas fa-file-export"></i> Export </button>
             </div>
           </div>
-          <!-- Add resize handle -->
           <div class="resize-handle">
             <div class="resize-handle-n"></div>
             <div class="resize-handle-e"></div>
@@ -238,7 +231,6 @@
             <div class="resize-handle-w"></div>
           </div>
         </div>
-        <!-- Context Menu -->
         <div id="context-menu" class="context-menu hidden">
           <ul>
             <li id="context-edit">
@@ -256,7 +248,20 @@
           </ul>
         </div>
 
-        <!-- Links Panel -->
+        <div id="domain-ip-panel" class="side-panel hidden">
+          <div class="panel-header">
+            <h3>🌐 Domain/IP Info Harvester</h3>
+            <button class="collapse-btn" onclick="togglePanel('domain-ip-panel')">
+                <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="panel-body">
+            <input type="text" id="lookupInput" placeholder="Enter Domain or IP" class="input-field" />
+            <button class="action-btn" onclick="runLookup()">Lookup</button>
+            <pre id="lookupResult" class="result-box">Results will appear here...</pre>
+          </div>
+        </div>
+
         <div id="links-panel" class="panel hidden">
           <div class="links-header">
             <div class="links-title">
@@ -430,7 +435,6 @@
           </div>
         </div>
 
-        <!-- Add this at the bottom of the app content, before the modals -->
         <div id="dork-panel" class="dork-panel hidden">
           <div class="dork-header">
             <div class="dork-title">
@@ -498,44 +502,7 @@
           </div>
         </div>
 
-        <!-- Dork Assistant Panel -->
-        <div id="dork-panel" class="dork-panel hidden">
-          <div class="dork-header">
-            <div class="dork-title">
-              <i class="fas fa-search-plus"></i>
-              Google Dork Assistant
-            </div>
-            <div class="panel-actions">
-              <button id="close-dork-btn" class="btn-icon">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <div class="dork-content">
-            <div class="dork-form">
-              <div id="dork-clauses">
-                <!-- Clauses will be added here -->
-              </div>
-              <button id="add-dork-clause" class="btn-secondary">
-                <i class="fas fa-plus"></i> Add Clause
-              </button>
-              <div class="dork-result">
-                <div id="final-dork-query"></div>
-              </div>
-              <div class="dork-actions">
-                <button id="search-dork" class="btn-primary">
-                  <i class="fas fa-search"></i> Search
-                </button>
-                <button id="reset-dork" class="btn-secondary">
-                  <i class="fas fa-redo"></i> Reset
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      <!-- Update the Add Entity Modal -->
-      <div id="add-entity-modal" class="modal hidden">
+        <div id="add-entity-modal" class="modal hidden">
         <div class="modal-content">
           <div class="modal-header">
             <h3>Add Entity</h3>
@@ -567,17 +534,13 @@
                   <option value="malware">🧪 Malware/Tool</option>
                 </select>
               </div>
-              <!-- Dynamic fields will be inserted here -->
-              <div class="form-group">
-                <label>Custom Metadata</label>
+              <div class="form-group hidden"> <label>Custom Metadata</label>
                 <div id="metadata-fields">
-                  <!-- Metadata fields will be added here -->
-                </div>
+                  </div>
                 <button type="button" id="add-metadata-field" class="btn-secondary">
                   <i class="fas fa-plus"></i> Add Metadata Field </button>
               </div>
-              <div class="form-group">
-                <label>Image</label>
+              <div class="form-group hidden"> <label>Image</label>
                 <div class="image-upload-container">
                   <div id="image-preview"></div>
                   <input type="file" id="node-image" accept="image/*">
@@ -627,7 +590,6 @@
           </div>
         </div>
       </div>
-      <!-- Add the edit connection modal -->
       <div id="edit-connection-modal" class="modal hidden">
         <div class="modal-content">
           <div class="modal-header">
@@ -696,5 +658,120 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
     <script type="module" src="./js/app.js"></script>
+    <script>
+        // Function to toggle the visibility of any panel
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.toggle('hidden');
+            }
+        }
+
+        // Make panel draggable
+        function makePanelDraggable(panelElement, headerElement) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            if (headerElement) {
+                headerElement.onmousedown = dragMouseDown;
+            } else {
+                panelElement.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // calculate the new cursor position:
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // set the panel's new position:
+                panelElement.style.top = (panelElement.offsetTop - pos2) + "px";
+                panelElement.style.left = (panelElement.offsetLeft - pos1) + "px";
+                panelElement.style.right = 'auto'; // Disable right positioning when dragging
+            }
+
+            function closeDragElement() {
+                // stop moving when mouse button is released:
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleWhoisBtn = document.getElementById('toggle-whois-btn');
+            const domainIpPanel = document.getElementById('domain-ip-panel');
+            const domainIpPanelHeader = domainIpPanel ? domainIpPanel.querySelector('.panel-header') : null;
+
+
+            if (toggleWhoisBtn) {
+                toggleWhoisBtn.addEventListener('click', () => {
+                    togglePanel('domain-ip-panel');
+                });
+            }
+
+            // Make the domain-ip-panel draggable
+            if (domainIpPanel && domainIpPanelHeader) {
+                makePanelDraggable(domainIpPanel, domainIpPanelHeader);
+            }
+            // Fix for duplicate dork-panel ID:
+            // Ensure you only have one dork-panel in your HTML.
+            // If you intend to have two, give them unique IDs.
+            // Assuming the one with the help button is the primary one,
+            // the second one in the original HTML should be removed or renamed.
+        });
+
+
+        async function runLookup() {
+            const input = document.getElementById("lookupInput").value.trim();
+            if (!input) return alert("Please enter a domain or IP.");
+
+            const resultBox = document.getElementById("lookupResult");
+            resultBox.textContent = "⏳ Fetching data...";
+
+            try {
+                const [geo, dns] = await Promise.all([
+                    fetch(`https://ipwhois.app/json/${input}`).then(r => r.json()),
+                    fetch(`https://dns.google/resolve?name=${input}&type=ANY`).then(r => r.json())
+                ]);
+
+                const geoOutput = `
+                📍 IP Geolocation:
+                - IP: ${geo.ip}
+                - Country: ${geo.country}
+                - Region: ${geo.region}
+                - City: ${geo.city}
+                - ISP: ${geo.isp}
+                - Org: ${geo.org}`;
+
+                const dnsOutput = dns.Answer ? `
+                🧾 DNS Records:
+                ${dns.Answer.map(a => `- ${a.type}: ${a.data}`).join("\n")}` : "No DNS records found.";
+
+                                const blacklistLinks = `
+                🚨 Blacklist / Reputation Links:
+                - AbuseIPDB: https://www.abuseipdb.com/check/${input}
+                - VirusTotal: https://www.virustotal.com/gui/search/${input}
+                - Talos: https://talosintelligence.com/reputation_center/lookup?search=${input}`;
+
+                resultBox.textContent = `${geoOutput}\n\n${dnsOutput}\n\n${blacklistLinks}`;
+            } catch (err) {
+                resultBox.textContent = "⚠️ Error fetching data. Some services may be down or CORS-blocked.";
+                console.error(err);
+            }
+        }
+    </script>
+
   </body>
 </html>
