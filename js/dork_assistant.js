@@ -18,7 +18,47 @@ const DORK_CATEGORIES = {
         title: "Employee Information",
         description: "Find employee information for a company",
         query: 'site:linkedin.com "{company}" employees OR staff OR team'
-      }
+      },
+        {
+            title: "Subdomain Enumeration",
+            description: "Find subdomains of a domain",
+            query: 'site:{domain} -www'
+        },
+        {
+            title: "IP Address Lookup",
+            description: "Find IP addresses associated with a domain",
+            query: 'site:{domain} "IP Address" OR "IP Location"'
+        },
+        {
+            title: "DNS Records",
+            description: "Find DNS records for a domain",
+            query: 'site:{domain} "DNS Records" OR "DNS Lookup"'
+        },
+        {
+            title: "WHOIS Information",
+            description: "Find WHOIS information for a domain",
+            query: 'site:{domain} "WHOIS" OR "Domain Registration"'
+        },
+        {
+            title: "SSL Certificates",
+            description: "Find SSL certificates for a domain",
+            query: 'site:{domain} "SSL Certificate" OR "TLS Certificate"'
+        },
+        {
+            title: "Web Technologies",
+            description: "Find web technologies used by a domain",
+            query: 'site:{domain} "Web Technologies" OR "Tech Stack"'
+        },
+        {
+            title: "Social Media Profiles",
+            description: "Find social media profiles for a domain",
+            query: 'site:{domain} "Facebook" OR "Twitter" OR "LinkedIn"'
+        },
+        {
+            title: "Public Repositories",
+            description: "Find public repositories for a domain",
+            query: 'site:{domain} "GitHub" OR "GitLab" OR "Bitbucket"'
+        }
     ]
   },
   files: {
@@ -39,7 +79,162 @@ const DORK_CATEGORIES = {
         title: "Configuration Files",
         description: "Find potential configuration files",
         query: 'filetype:conf OR filetype:config OR filetype:env "{keyword}"'
-      }
+      },
+        {
+            title: "Backup Files",
+            description: "Find backup files",
+            query: 'filetype:bak OR filetype:old OR filetype:zip "{keyword}"'
+        },
+        {
+            title: "Word Documents",
+            description: "Find Word documents",
+            query: "site:{domain} filetype:doc OR filetype:docx"
+        },
+        {
+            title: "PowerPoint Presentations",
+            description: "Find PowerPoint presentations",
+            query: "site:{domain} filetype:ppt OR filetype:pptx"
+        },
+        {
+            title: "Text Files",
+            description: "Find text files",
+            query: "site:{domain} filetype:txt"
+        },
+        {
+            title: "Image Files",
+            description: "Find image files",
+            query: "site:{domain} filetype:jpg OR filetype:png OR filetype:gif"
+        },
+        {
+            title: "Video Files",
+            description: "Find video files",
+            query: "site:{domain} filetype:mp4 OR filetype:avi OR filetype:mkv"
+        },
+        {
+            title: "Audio Files",
+            description: "Find audio files",
+            query: "site:{domain} filetype:mp3 OR filetype:wav OR filetype:aac"
+        },
+        {
+            title: "Archive Files",
+            description: "Find archive files",
+            query: "site:{domain} filetype:zip OR filetype:rar OR filetype:tar"
+        },
+        {
+            title: "Database Dumps",
+            description: "Find database dump files",
+            query: "site:{domain} filetype:sql OR filetype:dump"
+        },
+        {
+            title: "Code Files",
+            description: "Find code files",
+            query: "site:{domain} filetype:js OR filetype:py OR filetype:java"
+        },
+        {
+            title: "Configuration Files",
+            description: "Find configuration files",
+            query: 'site:{domain} filetype:conf OR filetype:ini OR filetype:yml'
+        },
+        {
+            title: "Log Files",
+            description: "Find log files",
+            query: 'site:{domain} filetype:log'
+        },
+        {
+            title: "Source Code",
+            description: "Find source code files",
+            query: 'site:{domain} filetype:php OR filetype:html OR filetype:css'
+        },
+        {
+            title: "Scripts",
+            description: "Find script files",
+            query: 'site:{domain} filetype:sh OR filetype:bat OR filetype:ps1'
+        },
+        {
+            title: "Configuration Backups",
+            description: "Find configuration backup files",
+            query: 'site:{domain} filetype:bkp OR filetype:bak'
+        },
+        {
+            title: "Sensitive Files",
+            description: "Find sensitive files",
+            query: 'site:{domain} filetype:key OR filetype:pem'
+        },
+        {
+            title: "Database Files",
+            description: "Find database files",
+            query: 'site:{domain} filetype:db OR filetype:sqlite'
+        },
+        {
+            title: "Virtual Machine Images",
+            description: "Find virtual machine images",
+            query: 'site:{domain} filetype:vmdk OR filetype:vdi'
+        },
+        {
+            title: "Docker Images",
+            description: "Find Docker images",
+            query: 'site:{domain} filetype:tar OR filetype:docker'
+        },
+        {
+            title: "Configuration Templates",
+            description: "Find configuration templates",
+            query: 'site:{domain} filetype:template OR filetype:yml'
+        },
+        {
+            title: "SSL Certificates",
+            description: "Find SSL certificate files",
+            query: 'site:{domain} filetype:crt OR filetype:pem'
+        },
+        {
+            title: "SSH Keys",
+            description: "Find SSH key files",
+            query: 'site:{domain} filetype:key OR filetype:pub'
+        },
+        {
+            title: "API Keys",
+            description: "Find API key files",
+            query: 'site:{domain} filetype:key OR filetype:json'
+        },
+        {
+            title: "Private Keys",
+            description: "Find private key files",
+            query: 'site:{domain} filetype:key OR filetype:pem'
+        },
+        {
+            title: "Public Keys",
+            description: "Find public key files",
+            query: 'site:{domain} filetype:key OR filetype:pub'
+        },
+        {
+            title: "Certificate Signing Requests",
+            description: "Find CSR files",
+            query: 'site:{domain} filetype:csr'
+        },
+        {
+            title: "SSL Certificate Chains",
+            description: "Find SSL certificate chain files",
+            query: 'site:{domain} filetype:pem OR filetype:crt'
+        },
+        {
+            title: "Certificate Revocation Lists",
+            description: "Find CRL files",
+            query: 'site:{domain} filetype:crl'
+        },
+        {
+            title: "Certificate Transparency Logs",
+            description: "Find CT log files",
+            query: 'site:{domain} filetype:ct'
+        },
+        {
+            title: "Certificate Authority Files",
+            description: "Find CA files",
+            query: 'site:{domain} filetype:ca'
+        },
+        {
+            title: "Certificate Signing Requests",
+            description: "Find CSR files",
+            query: 'site:{domain} filetype:csr'
+        }
     ]
   },
   vulnerabilities: {
@@ -60,7 +255,152 @@ const DORK_CATEGORIES = {
         title: "Exposed Git",
         description: "Find exposed Git repositories",
         query: 'site:{domain} inurl:.git'
-      }
+      },
+        {
+            title: "Exposed Directories",
+            description: "Find exposed directories",
+            query: 'site:{domain} inurl:/backup/ OR inurl:/uploads/'
+        },
+        {
+            title: "Sensitive Files",
+            description: "Find sensitive files",
+            query: 'site:{domain} filetype:log OR filetype:bak OR filetype:old'
+        },
+        {
+            title: "Vulnerable Software",
+            description: "Find pages with vulnerable software versions",
+            query: 'site:{domain} "version" OR "vulnerability" OR "CVE"'
+        },
+        {
+            title: "Open Redirects",
+            description: "Find open redirect vulnerabilities",
+            query: 'site:{domain} inurl:"redirect" OR inurl:"url"'
+        },
+        {
+            title: "Cross-Site Scripting (XSS)",
+            description: "Find potential XSS vulnerabilities",
+            query: 'site:{domain} inurl:"?id=" OR inurl:"?page="'
+        },
+        {
+            title: "Cross-Site Request Forgery (CSRF)",
+            description: "Find potential CSRF vulnerabilities",
+            query: 'site:{domain} inurl:"csrf" OR inurl:"token"'
+        },
+        {
+            title: "Remote File Inclusion (RFI)",
+            description: "Find potential RFI vulnerabilities",
+            query: 'site:{domain} inurl:"?file=" OR inurl:"?page="'
+        },
+        {
+            title: "Local File Inclusion (LFI)",
+            description: "Find potential LFI vulnerabilities",
+            query: 'site:{domain} inurl:"/etc/passwd" OR inurl:"/proc/self/environ"'
+        },
+        {
+            title: "Command Injection",
+            description: "Find potential command injection vulnerabilities",
+            query: 'site:{domain} inurl:"cmd=" OR inurl:"exec="'
+        },
+        {
+            title: "Directory Traversal",
+            description: "Find potential directory traversal vulnerabilities",
+            query: 'site:{domain} inurl:"../" OR inurl:"..\\\\"'
+        },
+        {
+            title: "Sensitive Information Disclosure",
+            description: "Find sensitive information disclosures",
+            query: 'site:{domain} "confidential" OR "sensitive" OR "private"'
+        },
+        {
+            title: "Open Ports",
+            description: "Find open ports on a domain",
+            query: 'site:{domain} inurl:"8080" OR inurl:"8443" OR inurl:"3306"'
+        },
+        {
+            title: "Exposed APIs",
+            description: "Find exposed APIs",
+            query: 'site:{domain} inurl:"api" OR inurl:"v1" OR inurl:"v2"'
+        },
+        {
+            title: "Exposed Services",
+            description: "Find exposed services",
+            query: 'site:{domain} inurl:"service" OR inurl:"status"'
+        },
+        {
+            title: "Sensitive Data Exposure",
+            description: "Find sensitive data exposure",
+            query: 'site:{domain} "sensitive data" OR "exposed data"'
+        },
+        {
+            title: "Unrestricted File Upload",
+            description: "Find unrestricted file upload vulnerabilities",
+            query: 'site:{domain} inurl:"upload" OR inurl:"file"'
+        },
+        {
+            title: "Server Misconfigurations",
+            description: "Find server misconfigurations",
+            query: 'site:{domain} "server" OR "configuration" OR "settings"'
+        },
+        {
+            title: "Open Ports",
+            description: "Find open ports on a domain",
+            query: 'site:{domain} inurl:"8080" OR inurl:"8443" OR inurl:"3306"'
+        },
+        {
+            title: "Exposed Services",
+            description: "Find exposed services",
+            query: 'site:{domain} inurl:"service" OR inurl:"status"'
+        },
+        {
+            title: "Sensitive Data Exposure",
+            description: "Find sensitive data exposure",
+            query: 'site:{domain} "sensitive data" OR "exposed data"'
+        },
+        {
+            title: "Unrestricted File Upload",
+            description: "Find unrestricted file upload vulnerabilities",
+            query: 'site:{domain} inurl:"upload" OR inurl:"file"'
+        },
+        {
+            title: "Server Misconfigurations",
+            description: "Find server misconfigurations",
+            query: 'site:{domain} "server" OR "configuration" OR "settings"'
+        },
+        {
+            title: "Open Redirects",
+            description: "Find open redirect vulnerabilities",
+            query: 'site:{domain} inurl:"redirect" OR inurl:"url"'
+        },
+        {
+            title: "Cross-Site Scripting (XSS)",
+            description: "Find potential XSS vulnerabilities",
+            query: 'site:{domain} inurl:"?id=" OR inurl:"?page="'
+        },
+        {
+            title: "Cross-Site Request Forgery (CSRF)",
+            description: "Find potential CSRF vulnerabilities",
+            query: 'site:{domain} inurl:"csrf" OR inurl:"token"'
+        },
+        {
+            title: "Remote File Inclusion (RFI)",
+            description: "Find potential RFI vulnerabilities",
+            query: 'site:{domain} inurl:"?file=" OR inurl:"?page="'
+        },
+        {
+            title: "Local File Inclusion (LFI)",
+            description: "Find potential LFI vulnerabilities",
+            query: 'site:{domain} inurl:"/etc/passwd" OR inurl:"/proc/self/environ"'
+        },
+        {
+            title: "Command Injection",
+            description: "Find potential command injection vulnerabilities",
+            query: 'site:{domain} inurl:"cmd=" OR inurl:"exec="'
+        },
+        {
+            title: "Directory Traversal",
+            description: "Find potential directory traversal vulnerabilities",
+            query: 'site:{domain} inurl:"../" OR inurl:"..\\\\"'
+        }
     ]
   },
   social: {
@@ -81,7 +421,97 @@ const DORK_CATEGORIES = {
         title: "Facebook Pages",
         description: "Find Facebook presence",
         query: 'site:facebook.com "{name}" OR "{company}"'
-      }
+      },
+      {
+        title: "Reddit Accounts",
+        description: "Find Reddit profiles",
+        query: 'site:reddit.com "{username}" OR "{name}"'
+      },
+      {
+          title: "Instagram Accounts",
+          description: "Find Instagram profiles",
+          query: 'site:instagram.com "{username}" OR "{name}"'
+      },
+      {
+          title: "TikTok Accounts",
+          description: "Find TikTok profiles",
+          query: 'site:tiktok.com "{username}" OR "{name}"'
+      },
+        {
+            title: "YouTube Channels",
+            description: "Find YouTube channels",
+            query: 'site:youtube.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Pinterest Accounts",
+            description: "Find Pinterest profiles",
+            query: 'site:pinterest.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Snapchat Accounts",
+            description: "Find Snapchat profiles",
+            query: 'site:snapchat.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Tumblr Blogs",
+            description: "Find Tumblr blogs",
+            query: 'site:tumblr.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Flickr Accounts",
+            description: "Find Flickr profiles",
+            query: 'site:flickr.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Quora Profiles",
+            description: "Find Quora profiles",
+            query: 'site:quora.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Discord Accounts",
+            description: "Find Discord profiles",
+            query: 'site:discord.com "{username}" OR "{name}"'
+        },
+        {
+            title: "Telegram Accounts",
+            description: "Find Telegram profiles",
+            query: 'site:telegram.org "{username}" OR "{name}"'
+        },
+        {
+            title: "WhatsApp Accounts",
+            description: "Find WhatsApp profiles",
+            query: 'site:whatsapp.com "{username}" OR "{name}"'
+        },
+        {
+            title: "LinkedIn Groups",
+            description: "Find LinkedIn groups",
+            query: 'site:linkedin.com/groups "{keyword}"'
+        },
+        {
+            title: "Facebook Groups",
+            description: "Find Facebook groups",
+            query: 'site:facebook.com/groups "{keyword}"'
+        },
+        {
+            title: "Reddit Communities",
+            description: "Find Reddit communities",
+            query: 'site:reddit.com/r/{keyword}'
+        },
+        {
+            title: "Discord Servers",
+            description: "Find Discord servers",
+            query: 'site:discord.gg "{keyword}"'
+        },
+        {
+            title: "Telegram Channels",
+            description: "Find Telegram channels",
+            query: 'site:t.me/{keyword}'
+        },
+        {
+            title: "WhatsApp Groups",
+            description: "Find WhatsApp groups",
+            query: 'site:wa.me/{keyword}'
+        }
     ]
   },
   credentials: {
@@ -102,7 +532,83 @@ const DORK_CATEGORIES = {
         title: "Config Files",
         description: "Find configuration files with credentials",
         query: 'site:{domain} filetype:env OR filetype:cfg "password" OR "credential"'
-      }
+      },
+        {
+            title: "Exposed Passwords",
+            description: "Find exposed passwords in files",
+            query: 'site:{domain} filetype:txt "password" OR "passwd"'
+        },
+        {
+            title: "SSH Keys",
+            description: "Find exposed SSH keys",
+            query: 'site:{domain} filetype:pub OR filetype:key "ssh-rsa" OR "ssh-dss"'
+        },
+        {
+            title: "API Endpoints",
+            description: "Find exposed API endpoints",
+            query: 'site:{domain} "api" OR "endpoint" OR "webhook"'
+        },
+        {
+            title: "OAuth Tokens",
+            description: "Find exposed OAuth tokens",
+            query: 'site:{domain} "oauth" OR "access_token" OR "refresh_token"'
+        },
+        {
+            title: "JWT Tokens",
+            description: "Find exposed JWT tokens",
+            query: 'site:{domain} "jwt" OR "json web token" OR "bearer token"'
+        },
+        {
+            title: "Session Cookies",
+            description: "Find exposed session cookies",
+            query: 'site:{domain} "session" OR "cookie" OR "csrf"'
+        },
+        {
+            title: "Credentials in URLs",
+            description: "Find credentials in URLs",
+            query: 'site:{domain} inurl:"username" OR inurl:"password"'
+        },
+        {
+            title: "Credentials in Forms",
+            description: "Find credentials in forms",
+            query: 'site:{domain} inurl:"login" OR inurl:"signup" "username" OR "password"'
+        },
+        {
+            title: "Credentials in Comments",
+            description: "Find credentials in comments",
+            query: 'site:{domain} "<!--" OR "<!---" "username" OR "password"'
+        },
+        {
+            title: "Credentials in Headers",
+            description: "Find credentials in HTTP headers",
+            query: 'site:{domain} "Authorization" OR "WWW-Authenticate" "Basic" OR "Bearer"'
+        },
+        {
+            title: "Credentials in Cookies",
+            description: "Find credentials in cookies",
+            query: 'site:{domain} "Set-Cookie" OR "Cookie" "username" OR "password"'
+        },
+        {
+            title: "Credentials in JavaScript",
+            description: "Find credentials in JavaScript files",
+            query: 'site:{domain} filetype:js "username" OR "password"'
+        },
+        {
+            title: "Credentials in HTML",
+            description: "Find credentials in HTML files",
+            query: 'site:{domain} filetype:html "username" OR "password"'
+        },
+        {
+            title: "Credentials in XML",
+            description: "Find credentials in XML files",
+            query: 'site:{domain} filetype:xml "username" OR "password"'
+        },
+        {
+            title: "Credentials in JSON",
+            description: "Find credentials in JSON files",
+            query: 'site:{domain} filetype:json "username" OR "password"'
+        }
+
     ]
   },
   database: {
@@ -173,10 +679,81 @@ const DORK_CATEGORIES = {
         query: 'site:{domain} "@{domain}"'
       },
       {
+        title: "Email Addresses (Across All Providers)",
+        description: "Find email addresses across various email providers",
+        query: "site:{domain} '{name}' \"@gmail.com\" OR site:outlook.com \"@outlook.com\" OR site:yahoo.com \"@yahoo.com\" OR site:protonmail.com \"@protonmail.com\" OR site:zoho.com \"@zoho.com\" OR site:aol.com \"@aol.com\" OR site:icloud.com \"@icloud.com\" OR site:mail.ru \"@mail.ru\""
+      },
+      {
+        title: "Email Addresses (With Keywords)",
+        description: "Find email addresses with specific keywords",
+        query: 'site:{domain} "@{keyword}"'
+      },
+      {
+        title: "Email Addresses (With Name)",
+        description: "Find email addresses with a specific name",
+        query: 'site:{domain} "{name}"'
+      }, 
+      {
         title: "Contact Emails",
         description: "Find contact email addresses",
         query: 'site:{domain} "contact" OR "email us" "@"'
-      }
+      },
+        {
+            title: "Support Emails",
+            description: "Find support email addresses",
+            query: 'site:{domain} "support" OR "help" OR "customer service" "@"'
+        },
+        {
+            title: "Sales Emails",
+            description: "Find sales email addresses",
+            query: 'site:{domain} "sales" OR "inquiries" OR "business" "@"'
+        },
+        {
+            title: "Marketing Emails",
+            description: "Find marketing email addresses",
+            query: 'site:{domain} "marketing" OR "promotions" OR "offers" "@"'
+        },
+        {
+            title: "HR Emails",
+            description: "Find HR email addresses",
+            query: 'site:{domain} "hr" OR "careers" OR "jobs" "@"'
+        },
+        {
+            title: "Admin Emails",
+            description: "Find admin email addresses",
+            query: 'site:{domain} "admin" OR "administrator" OR "webmaster" "@"'
+        },
+        {
+            title: "Partnership Emails",
+            description: "Find partnership email addresses",
+            query: 'site:{domain} "partnership" OR "collaboration" OR "alliances" "@"'
+        },
+        {
+            title: "Legal Emails",
+            description: "Find legal email addresses",
+            query: 'site:{domain} "legal" OR "compliance" OR "terms" "@"'
+        },
+        {
+            title: "Security Emails",
+            description: "Find security email addresses",
+            query: 'site:{domain} "security" OR "vulnerability" OR "incident response" "@"'
+        },
+        {
+            title: "Technical Support Emails",
+            description: "Find technical support email addresses",
+            query: 'site:{domain} "technical support" OR "IT support" OR "troubleshooting" "@"'
+        },
+        {
+            title: "Affiliate Emails",
+            description: "Find affiliate email addresses",
+            query: 'site:{domain} "affiliate" OR "referral" OR "partner" "@"'
+        },
+        {
+            title: "Customer Service Emails",
+            description: "Find customer service email addresses",
+            query: 'site:{domain} "customer service" OR "support" OR "help desk" "@"'
+        },
+
     ]
   },
   crypto: {
@@ -192,7 +769,62 @@ const DORK_CATEGORIES = {
         title: "Ethereum Addresses",
         description: "Find Ethereum addresses",
         query: 'site:{domain} "ethereum" OR "eth" OR "0x"'
-      }
+      },
+        {
+            title: "Crypto Wallets",
+            description: "Find crypto wallet addresses",
+            query: 'site:{domain} "wallet" OR "address" OR "public key"'
+        },
+        {
+            title: "Crypto Transactions",
+            description: "Find crypto transaction details",
+            query: 'site:{domain} "transaction" OR "tx" OR "blockchain"'
+        },
+        {
+            title: "Crypto Exchanges",
+            description: "Find crypto exchange information",
+            query: 'site:{domain} "exchange" OR "trading" OR "market"'
+        },
+        {
+            title: "Crypto News",
+            description: "Find crypto news articles",
+            query: 'site:{domain} "news" OR "update" OR "announcement"'
+        },
+        {
+            title: "Crypto Wallet Addresses",
+            description: "Find crypto wallet addresses",
+            query: 'site:{domain} "wallet" OR "address" OR "public key"'
+        },
+        {
+            title: "Crypto Transactions",
+            description: "Find crypto transaction details",
+            query: 'site:{domain} "transaction" OR "tx" OR "blockchain"'
+        },
+        {
+            title: "Crypto Exchanges",
+            description: "Find crypto exchange information",
+            query: 'site:{domain} "exchange" OR "trading" OR "market"'
+        },
+        {
+            title: "Crypto News",
+            description: "Find crypto news articles",
+            query: 'site:{domain} "news" OR "update" OR "announcement"'
+        },
+        {
+            title: "Crypto Mining",
+            description: "Find crypto mining information",
+            query: 'site:{domain} "mining" OR "pool" OR "hashrate"'
+        },
+        {
+            title: "Crypto Wallets",
+            description: "Find crypto wallet addresses",
+            query: 'site:{domain} "wallet" OR "address" OR "public key"'
+        },
+        {
+            title: "Crypto Transactions",
+            description: "Find crypto transaction details",
+            query: 'site:{domain} "transaction" OR "tx" OR "blockchain"'
+        }
     ]
   }
 };
