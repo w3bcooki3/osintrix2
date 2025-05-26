@@ -9,6 +9,54 @@
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/welcome.css" />
     <link rel="stylesheet" href="./css/dork_assistant.css" />
+    <style>
+      /* Basic styling for the mobile warning message */
+      #mobile-warning {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+        z-index: 10000; /* Ensure it's on top of everything */
+        font-family: var(--font-family);
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+      }
+      #mobile-warning.show {
+        opacity: 1;
+      }
+      #mobile-warning h2 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+      }
+      #mobile-warning p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 500px;
+      }
+      #mobile-warning .continue-btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+      }
+      #mobile-warning .continue-btn:hover {
+        background-color: var(--primary-dark);
+      }
+    </style>
   </head>
   <body>
     <div id="welcome-screen">
@@ -23,6 +71,14 @@
         </div>
       </div>
     </div>
+
+    <div id="mobile-warning" class="hidden">
+      <h2>Attention: Desktop Recommended</h2>
+      <p>OSINTrix is primarily designed for desktop use to provide the best experience and access to all features. For optimal functionality, please access this tool on a larger screen.</p>
+      <p>You can still proceed to view the graph and charts, but some options may not be fully visible or functional on smaller screens.</p>
+      <button class="continue-btn" id="continue-to-app">Continue Anyway</button>
+    </div>
+
     <div id="app" class="hidden">
       <header class="app-header">
         <div class="logo">
@@ -730,6 +786,34 @@
             // If you intend to have two, give them unique IDs.
             // Assuming the one with the help button is the primary one,
             // the second one in the original HTML should be removed or renamed.
+
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const app = document.getElementById('app');
+            const mobileWarning = document.getElementById('mobile-warning');
+            const continueBtn = document.getElementById('continue-to-app');
+            const MIN_DESKTOP_WIDTH = 768; // Define your threshold for desktop width
+
+            // Simulate welcome screen loading
+            setTimeout(() => {
+                welcomeScreen.classList.add('hidden'); // Hide welcome screen
+                
+                // Check screen width after welcome screen
+                if (window.innerWidth < MIN_DESKTOP_WIDTH) {
+                    mobileWarning.classList.remove('hidden');
+                    setTimeout(() => mobileWarning.classList.add('show'), 50); // Fade in the warning
+                } else {
+                    app.classList.remove('hidden'); // Show the app if desktop
+                }
+            }, 3000); // Adjust this time as needed for your welcome screen animation
+
+
+            if (continueBtn) {
+                continueBtn.addEventListener('click', () => {
+                    mobileWarning.classList.remove('show');
+                    mobileWarning.classList.add('hidden'); // Hide warning
+                    app.classList.remove('hidden'); // Show the app
+                });
+            }
         });
 
 
