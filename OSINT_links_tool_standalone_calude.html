@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT Link Manager - Professional Investigation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-filter-row {
+            display: grid;
+            grid-template-columns: 1fr 300px 200px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 18px;
+        }
+
+        .filter-select, .sort-select {
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus, .sort-select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .add-link-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .add-link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .link-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .link-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .link-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .link-url {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+            word-break: break-all;
+            transition: color 0.3s ease;
+        }
+
+        .link-url:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .link-description {
+            color: #666;
+            margin: 15px 0;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .link-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .link-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .link-date {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            color: white;
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(42, 82, 152, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .export-import-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .export-btn, .import-btn {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover, .import-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .import-file {
+            display: none;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .search-filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .export-import-actions {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 OSINT Link Manager</h1>
+            <p class="subtitle">Professional Investigation Resource Management</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-filter-row">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search links, descriptions, or tags...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Search Engines">Search Engines</option>
+                    <option value="People Search">People Search</option>
+                    <option value="Domain/IP">Domain/IP</option>
+                    <option value="Image Analysis">Image Analysis</option>
+                    <option value="Geolocation">Geolocation</option>
+                    <option value="Email">Email</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Data Breach">Data Breach</option>
+                    <option value="Business">Business</option>
+                    <option value="Archives">Archives</option>
+                    <option value="Other">Other</option>
+                </select>
+                <select id="sortBy" class="sort-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title">Title A-Z</option>
+                    <option value="category">Category</option>
+                </select>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalLinks">0</div>
+                    <div>Total Links</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCategories">0</div>
+                    <div>Categories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="recentLinks">0</div>
+                    <div>Added This Week</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <button class="add-link-btn" onclick="openModal()">
+                    ➕ Add New OSINT Tool
+                </button>
+                <div class="export-import-actions">
+                    <button class="export-btn" onclick="exportData()">📤 Export</button>
+                    <button class="import-btn" onclick="document.getElementById('importFile').click()">📥 Import</button>
+                    <input type="file" id="importFile" class="import-file" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+        </div>
+
+        <div id="linksContainer" class="links-grid">
+            <!-- Links will be dynamically inserted here -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">🔍</div>
+            <h3>No OSINT Tools Added Yet</h3>
+            <p>Start building your investigation toolkit by adding your first link!</p>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing links -->
+    <div id="linkModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New OSINT Tool</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <form id="linkForm">
+                <div class="form-group">
+                    <label class="form-label" for="linkTitle">Tool Name *</label>
+                    <input type="text" id="linkTitle" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkUrl">URL *</label>
+                    <input type="url" id="linkUrl" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkDescription">Description</label>
+                    <textarea id="linkDescription" class="form-textarea" placeholder="Describe what this tool is used for in investigations..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkCategory">Category *</label>
+                    <select id="linkCategory" class="form-select" required>
+                        <option value="">Select Category</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Search Engines">Search Engines</option>
+                        <option value="People Search">People Search</option>
+                        <option value="Domain/IP">Domain/IP</option>
+                        <option value="Image Analysis">Image Analysis</option>
+                        <option value="Geolocation">Geolocation</option>
+                        <option value="Email">Email</option>
+                        <option value="Phone">Phone</option>
+                        <option value="Data Breach">Data Breach</option>
+                        <option value="Business">Business</option>
+                        <option value="Archives">Archives</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkTags">Tags (comma-separated)</label>
+                    <input type="text" id="linkTags" class="form-input" placeholder="free, advanced, api, premium">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Tool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let links = [];
+        let editingId = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleData();
+            setupEventListeners();
+            renderLinks();
+            updateStats();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterAndRenderLinks);
+            document.getElementById('categoryFilter').addEventListener('change', filterAndRenderLinks);
+            document.getElementById('sortBy').addEventListener('change', filterAndRenderLinks);
+            
+            document.getElementById('linkForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveLink();
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('linkModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        }
+
+        function loadSampleData() {
+            if (links.length === 0) {
+                links = [
+                    {
+                        id: 1,
+                        title: "Maltego",
+                        url: "https://www.maltego.com/",
+                        description: "Comprehensive OSINT and graphical link analysis tool for gathering and connecting information for investigative tasks.",
+                        category: "Search Engines",
+                        tags: ["premium", "advanced", "link-analysis"],
+                        dateAdded: new Date('2024-01-15').toISOString()
+                    },
+                    {
+                        id: 2,
+                        title: "Shodan",
+                        url: "https://www.shodan.io/",
+                        description: "Search engine for Internet-connected devices. Find webcams, routers, servers and more.",
+                        category: "Domain/IP",
+                        tags: ["iot", "devices", "api", "premium"],
+                        dateAdded: new Date('2024-01-20').toISOString()
+                    },
+                    {
+                        id: 3,
+                        title: "TinEye",
+                        url: "https://tineye.com/",
+                        description: "Reverse image search engine to find where images appear online and track their usage.",
+                        category: "Image Analysis",
+                        tags: ["free", "reverse-search", "images"],
+                        dateAdded: new Date('2024-02-01').toISOString()
+                    },
+                    {
+                        id: 4,
+                        title: "Have I Been Pwned",
+                        url: "https://haveibeenpwned.com/",
+                        description: "Check if email addresses have been compromised in data breaches.",
+                        category: "Data Breach",
+                        tags: ["free", "email", "breach-check"],
+                        dateAdded: new Date('2024-02-10').toISOString()
+                    },
+                    {
+                        id: 5,
+                        title: "Wayback Machine",
+                        url: "https://archive.org/web/",
+                        description: "Browse websites as they appeared in the past. Essential for tracking changes and deleted content.",
+                        category: "Archives",
+                        tags: ["free", "historical", "websites"],
+                        dateAdded: new Date('2024-02-15').toISOString()
+                    }
+                ];
+            }
+        }
+
+        function openModal(linkId = null) {
+            editingId = linkId;
+            const modal = document.getElementById('linkModal');
+            const title = document.getElementById('modalTitle');
+            
+            if (linkId) {
+                const link = links.find(l => l.id === linkId);
+                title.textContent = 'Edit OSINT Tool';
+                document.getElementById('linkTitle').value = link.title;
+                document.getElementById('linkUrl').value = link.url;
+                document.getElementById('linkDescription').value = link.description;
+                document.getElementById('linkCategory').value = link.category;
+                document.getElementById('linkTags').value = link.tags.join(', ');
+            } else {
+                title.textContent = 'Add New OSINT Tool';
+                document.getElementById('linkForm').reset();
+            }
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('linkModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            editingId = null;
+            document.getElementById('linkForm').reset();
+        }
+
+        function saveLink() {
+            const title = document.getElementById('linkTitle').value.trim();
+            const url = document.getElementById('linkUrl').value.trim();
+            const description = document.getElementById('linkDescription').value.trim();
+            const category = document.getElementById('linkCategory').value;
+            const tagsInput = document.getElementById('linkTags').value.trim();
+            const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+
+            if (!title || !url || !category) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (editingId) {
+                const link = links.find(l => l.id === editingId);
+                link.title = title;
+                link.url = url;
+                link.description = description;
+                link.category = category;
+                link.tags = tags;
+            } else {
+                const newLink = {
+                    id: Date.now(),
+                    title,
+                    url,
+                    description,
+                    category,
+                    tags,
+                    dateAdded: new Date().toISOString()
+                };
+                links.unshift(newLink);
+            }
+
+            closeModal();
+            renderLinks();
+            updateStats();
+        }
+
+        function deleteLink(id) {
+            if (confirm('Are you sure you want to delete this OSINT tool?')) {
+                links = links.filter(link => link.id !== id);
+                renderLinks();
+                updateStats();
+            }
+        }
+
+        function filterAndRenderLinks() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filteredLinks = links.filter(link => {
+                const matchesSearch = !searchTerm || 
+                    link.title.toLowerCase().includes(searchTerm) ||
+                    link.description.toLowerCase().includes(searchTerm) ||
+                    link.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                    link.url.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = !categoryFilter || link.category === categoryFilter;
+                
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sort links
+            filteredLinks.sort((a, b) => {
+                switch (sortBy) {
+                    case 'oldest':
+                        return new Date(a.dateAdded) - new Date(b.dateAdded);
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'category':
+                        return a.category.localeCompare(b.category);
+                    case 'newest':
+                    default:
+                        return new Date(b.dateAdded) - new Date(a.dateAdded);
+                }
+            });
+
+            renderFilteredLinks(filteredLinks);
+        }
+
+        function renderLinks() {
+            renderFilteredLinks(links);
+        }
+
+        function renderFilteredLinks(filteredLinks) {
+            const container = document.getElementById('linksContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredLinks.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = filteredLinks.map(link => `
+                <div class="link-card">
+                    <div class="link-header">
+                        <div>
+                            <div class="link-title">${escapeHtml(link.title)}</div>
+                            <a href="${escapeHtml(link.url)}" target="_blank" class="link-url" rel="noopener noreferrer">
+                                ${escapeHtml(link.url)}
+                            </a>
+                        </div>
+                        <div class="link-actions">
+                            <button class="action-btn edit-btn" onclick="openModal(${link.id})" title="Edit">✏️</button>
+                            <button class="action-btn delete-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                    ${link.description ? `<div class="link-description">${escapeHtml(link.description)}</div>` : ''}
+                    <div class="link-meta">
+                        <div class="link-tags">
+                            <span class="tag">${escapeHtml(link.category)}</span>
+                            ${link.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                        </div>
+                        <div class="link-date">${formatDate(link.dateAdded)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const totalLinks = links.length;
+            const categories = [...new Set(links.map(link => link.category))].length;
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const recentLinks = links.filter(link => new Date(link.dateAdded) > oneWeekAgo).length;
+
+            document.getElementById('totalLinks').textContent = totalLinks;
+            document.getElementById('totalCategories').textContent = categories;
+            document.getElementById('recentLinks').textContent = recentLinks;
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(links, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `osint-links-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedLinks = JSON.parse(e.target.result);
+                    if (Array.isArray(importedLinks)) {
+                        if (confirm(`Import ${importedLinks.length} links? This will replace your current data.`)) {
+                            links = importedLinks;
+                            renderLinks();
+                            updateStats();
+                            alert('Data imported successfully!');
+                        }
+                    } else {
+                        alert('Invalid file format. Please select a valid JSON file.');
+                    }
+                } catch (error) {
+                    alert('Error reading file. Please make sure it\'s a valid JSON file.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset file input
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            
+            // Ctrl/Cmd + N to add new link
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openModal();
+            }
+            
+            // Escape to close modal
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Auto-save functionality (you can extend this to use localStorage if needed)
+        function autoSave() {
+            // This would typically save to localStorage or send to a server
+            // For demo purposes, we'll just update the stats
+            updateStats();
+        }
+
+        // Call autoSave whenever links change
+        const originalPush = links.push;
+        const originalSplice = links.splice;
+        
+        // Initialize the app
+        filterAndRenderLinks();
+
+        //delete it underneath code
+        setInterval(autoSave, 5000); // Auto-save every 5 seconds
+        links.push = function(...args) {
+            const result = originalPush.apply(this, args);
+            updateStats();
+            return result;
+        };
+        links.splice = function(...args) {
+            const result = originalSplice.apply(this, args);
+            updateStats();
+            return result;
+        };
+    </script>
+</body>
+</html>
